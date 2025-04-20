@@ -14,7 +14,7 @@ where `socket` supports all actions:
 
 `Html page` has interactive boxes and buttons to support:
 
-- text boox to point WS server ( by default it is: wss://echo.websocket.org );
+- text box to point WS server ( by default it is: wss://echo.websocket.org );
 - text box to enter message which you wish to send to WS server;
 - button `Send` - to send message from text box to WS and get response.
 - button `Disconnect` to stop connection to WS server.
