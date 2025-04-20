@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client by LUKCAD</title>
+    <style>
+        h1 {
+            color: green;
+        }
+
+        .container {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>WebSocket Client</h1>
+    <div class="container">
+        <label>WS Server to interact with messages:</label><input type="text" id="nameServer" value="wss://echo.websocket.org" /> <br><br>
+        <label>Message:</label><input type="text" id="messageInput" />
+        <button onclick="sendMessage()">Send</button>
+		<button onclick="closeConnect()">Disconnect</button>
+		<button onclick="reConnect()">Reconnect</button>
+        <div id="output"></div>
+    </div>
+
+    <script>
+        // Create a WebSocket instance
+        // and connect to the server
+        var socket;
+		var wsUri;
+		
+		function reConnect() {
+		
+			 wsUri = document.getElementById("nameServer").value;
+			 socket = new WebSocket(wsUri);
+			
+			 socket.onopen = function(evt) {
+				onOpen(evt)
+			 };
+			
+			 socket.onclose = function(evt) {
+				onClose(evt)
+			 };
+			
+			 socket.onmessage = function(evt) {
+				onMessage(evt)
+			 };
+			
+			 socket.onerror = function(evt) {
+				onError(evt)
+			 };
+		}
+
+        // Event listener for when 
+        //the WebSocket connection is opened
+        onOpen = function (event) {
+            // Write message that users is 
+            // connected to the WebSocket server
+            writeToScreen('You are Connected to WebSocket Server', 'green');
+        };
+
+        // Event listener for when a message
+        //  is received from the server
+        onMessage = function (event) {
+            writeToScreen(`Response message: ${event.data}`, 'green');
+        };
+
+        // Event listener for when the 
+        // WebSocket connection is closed
+        onClose = function (event) {
+            // Log a message when disconnected
+            //  from the WebSocket server
+            //console.log('Disconnected from WebSocket server');
+			writeToScreen(`You are disconnected from WebSocket Server. Code: ${event.code} `, 'red');
+        };
+
+		// Event listener for when the 
+		// WebSocket sending message had error
+		onError = function (event) {
+			writeToScreen(`It was error.`, 'red');
+        };
+
+        // Function to send a message
+        //  to the WebSocket server
+        function sendMessage() {
+            // Get the message input element
+            const messageInput = document
+                .getElementById('messageInput');
+            // Get the value of
+            // the message input
+            const message = messageInput.value;
+
+			if (socket.readyState === WebSocket.OPEN) {
+				// Send the message to 
+				// the WebSocket server			
+				socket.send(message);
+				// and show what we sent
+				writeToScreen(`Sent message: ${message}`, 'blue');
+			}
+            // Clear the message input
+            messageInput.value = '';
+        }
+		
+        function closeConnect() {
+			if (socket.readyState === WebSocket.OPEN) {
+				socket.close();
+			}
+		}	
+
+		function writeToScreen(message, color = 'black') {
+			 var pre = document.createElement("p"); 
+			 pre.style.wordWrap = "break-word"; 
+			 pre.style.color = `${color}`;
+			 pre.innerHTML = message; 
+			 const outputDiv = document
+                .getElementById('output');
+			 outputDiv.appendChild(pre);
+	    }
+		
+		reConnect()
+    </script>
+</body>
+
+</html>
