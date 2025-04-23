@@ -19,8 +19,8 @@
 <body>
     <h1>WebSocket Client</h1>
     <div class="container">
-        <label>WS Server to interact with messages:</label><input type="text" id="nameServer" value="wss://echo.websocket.org" /> <br><br>
-        <label>Message:</label><input type="text" id="messageInput" />
+        <label>WS Server to interact with messages:</label></br></label><input type="text" size="85px"  id="nameServer" value="wss://echo.websocket.org" /> <br><br>
+        <label>Message:</label><br/><textarea rows = "5" cols = "80" id="messageInput"></textarea></br>
         <button onclick="sendMessage()">Send</button>
 		<button onclick="closeConnect()">Disconnect</button>
 		<button onclick="reConnect()">Reconnect</button>
