@@ -24,6 +24,7 @@
         <button onclick="sendMessage()">Send</button>
 		<button onclick="closeConnect()">Disconnect</button>
 		<button onclick="reConnect()">Reconnect</button>
+        <button onclick="clearScreen()">Clear Messages</button>
         <div id="output"></div>
     </div>
 
@@ -119,6 +120,11 @@
 			 const outputDiv = document
                 .getElementById('output');
 			 outputDiv.appendChild(pre);
+	    }
+
+        function clearScreen() {
+
+             document.getElementById("output").innerHTML = "";
 	    }
 		
 		reConnect()
