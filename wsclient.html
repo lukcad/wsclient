@@ -13,19 +13,48 @@
         .container {
             margin: 10px;
         }
+
+        div.topRow {
+            width:100%;
+            clear:both;
+        }
+        div.leftCol {
+            width:50%;
+            float:left;
+        }
+        div.rightCol {
+            width:50%;
+            float:right;
+        }
+        input {
+            width: 100%;
+        }
+        textarea {
+            width: 100%;
+        }
     </style>
 </head>
 
 <body>
     <h1>WebSocket Client</h1>
     <div class="container">
-        <label>WS Server to interact with messages:</label></br></label><input type="text" size="85px"  id="nameServer" value="wss://echo.websocket.org" /> <br><br>
-        <label>Message:</label><br/><textarea rows = "5" cols = "80" id="messageInput"></textarea></br>
+        <label>WS Server to interact with messages:</label></br><input type="text" id="nameServer" value="wss://echo.websocket.org" /> <br>
+        <label>Message:</label><br/><textarea rows = "5"  id="messageInput"></textarea></br>
         <button onclick="sendMessage()">Send</button>
 		<button onclick="closeConnect()">Disconnect</button>
 		<button onclick="reConnect()">Reconnect</button>
-        <button onclick="clearScreen()">Clear Messages</button>
-        <div id="output"></div>
+        <button onclick="clearScreen()">Clean Messages</button>
+ 
+        <div class="main">
+            <div class="topRow"></div>
+            <div class="leftCol">Messages:</div>
+            <div class="rightCol">History of sending unical messages:</div>
+        <div>
+        <div class="main">
+            <div class="topRow"></div>
+            <div id="output" class="leftCol"></div>
+            <div id="history" class="rightCol"></div>
+        <div>            
     </div>
 
     <script>
@@ -33,6 +62,16 @@
         // and connect to the server
         var socket;
 		var wsUri;
+
+        var json_str = getCookie('mycookie')? getCookie('mycookie') : '[]';
+        var arr = JSON.parse(json_str);
+
+        
+
+        arr.forEach((item) => {
+            console.log(item);
+            writeToHistory(`${item}`, 'brown');
+        })
 		
 		function reConnect() {
 		
@@ -101,6 +140,16 @@
 				socket.send(message);
 				// and show what we sent
 				writeToScreen(`Sent message: ${message}`, 'blue');
+                
+                if (arr.indexOf(message) < 0) {
+                    arr.push(message);
+                    var json_str = JSON.stringify(arr);
+                    createCookie('mycookie', json_str, 99);
+                    writeToHistory(`${message}`, 'brown');
+                }
+               
+
+                
 			}
             // Clear the message input
             messageInput.value = '';
@@ -120,14 +169,55 @@
 			 const outputDiv = document
                 .getElementById('output');
 			 outputDiv.appendChild(pre);
+            
+	    }
+
+        function writeToHistory(message, color = 'black') {
+			 var pre = document.createElement("p"); 
+			 pre.style.wordWrap = "break-word"; 
+			 pre.style.color = `${color}`;
+			 pre.innerHTML = message; 
+             const historyDiv = document
+                .getElementById('history');
+             historyDiv.appendChild(pre);
 	    }
 
         function clearScreen() {
 
              document.getElementById("output").innerHTML = "";
 	    }
+
+        function createCookie(name, value, days) {
+            var expires;
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            }
+            else {
+                expires = "";
+            }
+            document.cookie = name + "=" + value + expires + ";path=/";
+        }
+
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=");
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1;
+                    c_end = document.cookie.indexOf(";", c_start);
+                    if (c_end == -1) {
+                        c_end = document.cookie.length;
+                    }
+                    return unescape(document.cookie.substring(c_start, c_end));
+                }
+            }
+            return "";
+        }
 		
 		reConnect()
+
+
     </script>
 </body>
 
