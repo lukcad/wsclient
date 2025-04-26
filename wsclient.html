@@ -32,6 +32,36 @@
         textarea {
             width: 100%;
         }
+
+        .btn {
+            background-color: DodgerBlue;
+            border: none;
+            color: white;
+            padding: 4px 4px;
+            font-size: 12px;
+            cursor: pointer;
+
+        }
+
+            /* Darker background on mouse-over */
+            .btn:hover {
+            background-color: RoyalBlue;
+        }
+        div.histTop {
+            width:100%;
+            clear:both;
+        }
+        div.histText {
+            width:90%;
+            float:left;
+
+        }
+        div.histBtn {
+
+            float:right;
+            
+    
+        }
     </style>
 </head>
 
@@ -41,10 +71,10 @@
         <h3>WebSocket Client</h3>
         <label>WS Server to interact with messages:</label></br><input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
         <label>Message:</label></br><textarea rows = "5"  id="messageInput"></textarea></br>
-        <button onclick="sendMessage()">Send</button>
-		<button onclick="closeConnect()">Disconnect</button>
-		<button onclick="reConnect()">Reconnect</button>
-        <button onclick="clearScreen()">Clean Messages</button>
+        <button class="btn" onclick="sendMessage()">Send</button>
+		<button class="btn" onclick="closeConnect()">Disconnect</button>
+		<button class="btn" onclick="reConnect()">Reconnect</button>
+        <button class="btn" onclick="clearScreen()">Clean Messages</button>
  
         <div class="main">
             <div class="topRow"></div>
@@ -68,16 +98,27 @@
         var arr = JSON.parse(json_str);
         if (json_str === '[]'){
             json_str = localStorage.getItem("wsmshistory")? localStorage.getItem("wsmshistory") : '[]';
-            arr = JSON.parse(json_str);
+            var rawarr = JSON.parse(json_str);
+
+            for (let index = 0; index < rawarr.length; index++) {
+                const element = rawarr[index];
+                if (element !== null){
+                    arr.push(element);
+                }
+                
+            }
+            
         }
         
 
-        
-
-        arr.forEach((item) => {
+        function reloadHistory() {
+            arr.forEach((item) => {
             console.log(item);
             writeToHistory(`${item}`, 'brown');
         })
+        }
+
+
 		
 		function reConnect() {
 		
@@ -180,19 +221,70 @@
 	    }
 
         function writeToHistory(message, color = 'black') {
+
+            var histTop = document.createElement("div"); 
+            histTop.style.wordWrap = "break-word"; 
+            histTop.className = "histTop"; 
+                       
 			 var pre = document.createElement("p"); 
 			 pre.style.wordWrap = "break-word"; 
 			 pre.style.color = `${color}`;
 			 pre.innerHTML = message; 
              pre.onclick = copyToMessage;
-             const historyDiv = document
-                .getElementById('history');
-             historyDiv.appendChild(pre);
 
-             function copyToMessage(){
+             var delbtn = document.createElement("button"); 
+			 delbtn.className = "btn"; 
+             delbtn.title = "Delete message from history";
+             delbtn.onclick = delMessageFromHistory;
+			 delbtn.innerHTML = "x"; 
+              
+            var histText = document.createElement("div"); 
+            histText.className = "histText"; 
+            histText.appendChild(pre);
+
+
+
+            var preBtn = document.createElement("p"); 
+            preBtn.style.wordWrap = "break-word"; 
+            preBtn.appendChild(delbtn);
+
+            var histBtn = document.createElement("div"); 
+            histBtn.className = "histBtn";              
+            histBtn.appendChild(preBtn); 
+
+            histTop.append(histText, histBtn);
+
+            const historyDiv = document
+                .getElementById('history');
+            historyDiv.appendChild(histTop);
+
+
+            function copyToMessage(){
                 var messageInput = document
                 .getElementById('messageInput');
                 messageInput.value = message;
+            }
+
+            function delMessageFromHistory() {
+                if (arr.indexOf(message) >= 0) {
+                    var indextoremove = arr.indexOf(message);
+                    var newarr = [];
+                    for (let index = 0; index < arr.length; index++) {
+                        var element = arr[index];
+                        if (indextoremove !== index) {
+                            newarr.push(element);
+                        }
+                        
+                    }
+                    arr = newarr;
+                    var json_str = JSON.stringify(arr);
+                    
+                    localStorage.setItem("wsmshistory", json_str);
+                    createCookie('mycookie', json_str, 99);
+                    historyDiv.innerHTML = '';
+                    reloadHistory()
+
+                }                
             }
 	    }
 
@@ -232,7 +324,7 @@
         }
 		
 		reConnect()
-
+        reloadHistory()
 
     </script>
 </body>
