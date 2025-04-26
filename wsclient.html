@@ -184,10 +184,19 @@
 			 pre.style.wordWrap = "break-word"; 
 			 pre.style.color = `${color}`;
 			 pre.innerHTML = message; 
+             pre.onclick = copyToMessage;
              const historyDiv = document
                 .getElementById('history');
              historyDiv.appendChild(pre);
+
+             function copyToMessage(){
+                var messageInput = document
+                .getElementById('messageInput');
+                messageInput.value = message;
+            }
 	    }
+
+
 
         function clearScreen() {
 

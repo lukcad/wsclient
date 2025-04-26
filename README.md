@@ -20,6 +20,7 @@ where `socket` supports all actions:
 - button `Disconnect` to stop connection to WS server.
 - button `Reconnect` to start connection to WS server again after stop.
 - button `Clean Messages` to remove messages from panel `Messages`.
+- pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
 
 Panel `Histoy of sending unical messages` helps you keep history of messages to re-use those for re-sending when you re-open client or clean up messages. 
 
