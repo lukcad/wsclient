@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Client by LUKCAD</title>
     <style>
-        h1 {
+        h3 {
             color: green;
         }
 
         .container {
-            margin: 10px;
+            margin: 5px;
         }
 
         div.topRow {
@@ -36,10 +36,11 @@
 </head>
 
 <body>
-    <h1>WebSocket Client</h1>
+    
     <div class="container">
-        <label>WS Server to interact with messages:</label></br><input type="text" id="nameServer" value="wss://echo.websocket.org" /> <br>
-        <label>Message:</label><br/><textarea rows = "5"  id="messageInput"></textarea></br>
+        <h3>WebSocket Client</h3>
+        <label>WS Server to interact with messages:</label></br><input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
+        <label>Message:</label></br><textarea rows = "5"  id="messageInput"></textarea></br>
         <button onclick="sendMessage()">Send</button>
 		<button onclick="closeConnect()">Disconnect</button>
 		<button onclick="reConnect()">Reconnect</button>
@@ -65,6 +66,11 @@
 
         var json_str = getCookie('mycookie')? getCookie('mycookie') : '[]';
         var arr = JSON.parse(json_str);
+        if (json_str === '[]'){
+            json_str = localStorage.getItem("wsmshistory")? localStorage.getItem("wsmshistory") : '[]';
+            arr = JSON.parse(json_str);
+        }
+        
 
         
 
@@ -144,6 +150,7 @@
                 if (arr.indexOf(message) < 0) {
                     arr.push(message);
                     var json_str = JSON.stringify(arr);
+                    localStorage.setItem("wsmshistory", json_str);
                     createCookie('mycookie', json_str, 99);
                     writeToHistory(`${message}`, 'brown');
                 }
