@@ -21,7 +21,8 @@ where `socket` supports all actions:
 - button `Reconnect` to start connection to WS server again after stop.
 - button `Clean Messages` to remove messages from panel `Messages`.
 - pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
-- you can remove from `History` any messages by using `X` button.
+- you can remove any message from `History` of messages by using `X` button  with confirmation prompt.
+- you can remove any WS server from `History WS Servers` by using `X` button with confirmation prompt.
 
 `Information how to use` is provided by details text which can be expanded or hided when you press on item of page which has this symbol: &#x27A4;
 

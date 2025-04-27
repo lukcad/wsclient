@@ -14,47 +14,52 @@
             color: #f1f1f1;
         }
 
+        .sidenav details summary {
+            padding: 4px 4px 14px 0px;
+            color: #f1f1f1;
+        }
+
         .sidenav {
-        height: 100%;
-        width: 0;
-        position: fixed;
-        z-index: 1;
-        top: 0;
-        left: 0;
-        background-color: #111;
-        overflow-x: hidden;
-        transition: 0.5s;
-        padding-top: 10px;
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.5s;
+            padding-top: 10px;
         }
 
         .sidenav a {
-        padding: 4px 4px 4px 16px;
-        text-decoration: none;
-        font-size: 14px;
-        color: #818181;
-        display: block;
-        transition: 0.3s;
+            padding: 4px 4px 4px 16px;
+            text-decoration: none;
+            font-size: 14px;
+            color: #818181;
+            display: block;
+            transition: 0.3s;
         }
 
         .sidenav a:hover {
-        color: #f1f1f1;
+            color: #f1f1f1;
         }
 
         .sidenav .closebtn {
-        position: absolute;
-        top: 0;
-        right: 15px;
-        font-size: 36px;
-        margin-left: 80px;
+            position: absolute;
+            top: 0;
+            right: 5px;
+            font-size: 34px;
+            margin-left: 100px;
         }
 
         .sidenav p {
-        padding: 4px 48px 4px 16px;
-        text-decoration: none;
-        font-size: 12px;
-        color: #ddf316;
-        display: block;
-        transition: 0.3s;
+            padding: 4px 48px 4px 16px;
+            text-decoration: none;
+            font-size: 12px;
+            color: #ddf316;
+            display: block;
+            transition: 0.3s;
         }
 
         h4 {
@@ -66,6 +71,7 @@
         }
 
         .container details {
+   
             margin: 0px;
         }
 
@@ -125,6 +131,17 @@
 
             float:right;
         }
+
+        .close {
+            cursor: pointer;
+            position: absolute;
+            right: 0%;
+            padding: 8px 6px;
+            margin: 5px;
+            transform: translate(0%, -50%);
+        }
+
+        .close:hover {background: #bbb;}
 
     </style>
 </head>
@@ -195,7 +212,13 @@
             prenav.href = `javascript:void(0)`;
             prenav.onclick = chooseWsServer;
             prenav.title = "Choose this WS server";
-            prenav.innerHTML = wsserver; 
+            prenav.innerHTML = `${wsserver}`; 
+            var spandel = document.createElement("span"); 
+            spandel.title = "remove from history";
+            spandel.onclick = removeWsServer;
+            spandel.className = "close";
+            spandel.innerHTML = "&times;";
+            prenav.appendChild(spandel);
             const barSidenav = document
             .getElementById('listWsServersHistory');
             barSidenav.appendChild(prenav);
@@ -205,6 +228,31 @@
                 document.getElementById("barSideNav").style.width = "0";
             }
 
+            function removeWsServer() {
+                var result = confirm(`Want to delete WS server: "${wsserver}" ?`);
+                if (result) {
+                    if (arrNav.indexOf(wsserver) >= 0) {
+                        var indextoremove = arrNav.indexOf(wsserver);
+                        var newarrnav = [];
+                        for (let index = 0; index < arrNav.length; index++) {
+
+                            if(index !== indextoremove)
+                            {
+                                if (arrNav[index] !== null) {
+                                    newarrnav.push(arrNav[index]);
+                                }
+                                
+                            } 
+                                                    
+                        }
+                        arrNav = newarrnav;
+
+                        var json_nav_str = JSON.stringify(arrNav);
+                        localStorage.setItem("wsmsservers", json_nav_str);
+                        reloaNav() 
+                    }
+                }
+            }
         }
 
         function selectWsServer(wsserver) {
@@ -400,22 +448,26 @@
             }
 
             function delMessageFromHistory() {
-                if (arr.indexOf(message) >= 0) {
-                    var indextoremove = arr.indexOf(message);
-                    var newarr = [];
-                    for (let index = 0; index < arr.length; index++) {
-                        var element = arr[index];
-                        if (indextoremove !== index) {
-                            newarr.push(element);
-                        }
-                        
-                    }
-                    arr = newarr;
-                    var json_str = JSON.stringify(arr);
-                    localStorage.setItem("wsmshistory", json_str);
-                    reloadHistory()
 
-                }                
+                var result = confirm(`Want to delete from history: "${message}" ?`);
+                if (result) {
+                    if (arr.indexOf(message) >= 0) {
+                        var indextoremove = arr.indexOf(message);
+                        var newarr = [];
+                        for (let index = 0; index < arr.length; index++) {
+                            var element = arr[index];
+                            if (indextoremove !== index) {
+                                newarr.push(element);
+                            }
+                            
+                        }
+                        arr = newarr;
+                        var json_str = JSON.stringify(arr);
+                        localStorage.setItem("wsmshistory", json_str);
+                        reloadHistory()
+
+                    }   
+                }             
             }
 	    }
 
