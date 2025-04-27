@@ -6,12 +6,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Client by LUKCAD</title>
     <style>
-        h3 {
+        body {
+            font-family: "Lato", sans-serif;
+        }
+
+        .sidenav details {
+            color: #f1f1f1;
+        }
+
+        .sidenav {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        background-color: #111;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 10px;
+        }
+
+        .sidenav a {
+        padding: 4px 4px 4px 16px;
+        text-decoration: none;
+        font-size: 14px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+        }
+
+        .sidenav a:hover {
+        color: #f1f1f1;
+        }
+
+        .sidenav .closebtn {
+        position: absolute;
+        top: 0;
+        right: 15px;
+        font-size: 36px;
+        margin-left: 80px;
+        }
+
+        .sidenav p {
+        padding: 4px 48px 4px 16px;
+        text-decoration: none;
+        font-size: 12px;
+        color: #ddf316;
+        display: block;
+        transition: 0.3s;
+        }
+
+        h4 {
             color: green;
         }
 
         .container {
             margin: 5px;
+        }
+
+        .container details {
+            margin: 0px;
+        }
+
+        .container details p {
+            margin: 3px;
+            font-size: 12px;
+            color: rgb(147, 11, 238);
+        }
+
+        .container p {
+            margin: 3px;
+            font-size: 13px;
         }
 
         div.topRow {
@@ -54,23 +120,35 @@
         div.histText {
             width:90%;
             float:left;
-
         }
         div.histBtn {
 
             float:right;
-            
-    
         }
+
     </style>
 </head>
 
 <body>
+
+    <div id="barSideNav" class="sidenav">
+        <a href="javascript:void(0)"  class="closebtn" onclick="closeNav()">&times;</a>
+          <details><summary>History WS servers:</summary>
+        <p>In this panel you can choose previously successfuly used web socket servers that we stored in history of your web browser during your testing. If this list is empty, try send something to demoserver which is proposed by default.</p>
+        </details>
+        <div id="listWsServersHistory"></div>
+    </div>    
     
     <div class="container">
-        <h3>WebSocket Client</h3>
-        <label>WS Server to interact with messages:</label></br><input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
-        <label>Message:</label></br><textarea rows = "5"  id="messageInput"></textarea></br>
+        <h4><div style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div></h4>
+        <details><summary>WS Server to interact with messages:</summary>
+        <p>You should point here your ws server manually or choose from left navigation panel &#9776; from list of history of previously used WS servers. Once it is done you can use buttons Reconnect ot Diconnest.</p>
+        </details>
+        <input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
+        <details><summary>Message:</summary>
+        <p>You should enter text message or json message and press Send button to send message to WS server. Notice: previously you should be connected to WS server using button Reconnect</p>
+        </details>
+        <textarea rows = "5"  id="messageInput"></textarea></br>
         <button class="btn" onclick="sendMessage()">Send</button>
 		<button class="btn" onclick="closeConnect()">Disconnect</button>
 		<button class="btn" onclick="reConnect()">Reconnect</button>
@@ -78,8 +156,8 @@
  
         <div class="main">
             <div class="topRow"></div>
-            <div class="leftCol">Messages:</div>
-            <div class="rightCol">History of sending unical messages:</div>
+            <div class="leftCol"><details><summary>Messages:</summary><p>This panal expose your requests and responses betwen your client and WS server. Errored messages have red colour.</p></details></div>
+            <div class="rightCol"><details><summary>History of sending unical messages:</summary><p>This panel has list of wunique messages that were successfuly sent to ws server. If you press any message the value of message will be inserted to Message box and you can resend it again.</p></details></div>
         <div>
         <div class="main">
             <div class="topRow"></div>
@@ -94,6 +172,60 @@
         var socket;
 		var wsUri;
 
+        var json_srv_str = localStorage.getItem("wsmsservers")? localStorage.getItem("wsmsservers") : '[]';
+        var arrnavraw = JSON.parse(json_srv_str);
+        var arrNav = [];
+
+        for (let index = 0; index < arrnavraw.length; index++) {
+            const element = arrnavraw[index];
+            if (element !== null){
+                arrNav.push(element);
+            }
+        }
+
+        function initInputOfWeServer() {
+            wsUri = localStorage.getItem("wsmsserveractive")? localStorage.getItem("wsmsserveractive") : 'wss://echo.websocket.org';
+            document.getElementById('nameServer').value = wsUri;
+        }
+
+
+        function addNavElement(wsserver) {
+            var prenav = document.createElement("a"); 
+            prenav.style.wordWrap = "break-word"; 
+            prenav.href = `javascript:void(0)`;
+            prenav.onclick = chooseWsServer;
+            prenav.title = "Choose this WS server";
+            prenav.innerHTML = wsserver; 
+            const barSidenav = document
+            .getElementById('listWsServersHistory');
+            barSidenav.appendChild(prenav);
+
+            function chooseWsServer() {
+                document.getElementById('nameServer').value = wsserver;
+                document.getElementById("barSideNav").style.width = "0";
+            }
+
+        }
+
+        function selectWsServer(wsserver) {
+            document.getElementById('nameServer').value = wsserver;
+            document.getElementById("barSideNav").style.width = "0";
+        }
+        
+        function reloaNav() {
+            document.getElementById('listWsServersHistory').innerHTML = '';
+            arrNav.forEach((item) => {
+            addNavElement(`${item}`);
+            })
+        }  
+
+        function openNav() {
+        document.getElementById("barSideNav").style.width = "250px";
+        }
+
+        function closeNav() {
+        document.getElementById("barSideNav").style.width = "0";
+        }        
 
         var json_str = localStorage.getItem("wsmshistory")? localStorage.getItem("wsmshistory") : '[]';
         var arrraw = JSON.parse(json_str);
@@ -106,18 +238,14 @@
             }
             
         }
-            
-        //}
-        
 
         function reloadHistory() {
+            document.getElementById('history').innerHTML = '';
             arr.forEach((item) => {
             console.log(item);
             writeToHistory(`${item}`, 'brown');
         })
         }
-
-
 		
 		function reConnect() {
 		
@@ -146,7 +274,8 @@
         onOpen = function (event) {
             // Write message that users is 
             // connected to the WebSocket server
-            writeToScreen('You are Connected to WebSocket Server', 'green');
+            writeToScreen(`You are Connected to Server "${wsUri}"`, 'green');
+
         };
 
         // Event listener for when a message
@@ -161,7 +290,7 @@
             // Log a message when disconnected
             //  from the WebSocket server
             //console.log('Disconnected from WebSocket server');
-			writeToScreen(`You are disconnected from WebSocket Server. Code: ${event.code} `, 'red');
+			writeToScreen(`You are disconnected from Server "${wsUri}". Code: ${event.code} `, 'red');
         };
 
 		// Event listener for when the 
@@ -194,7 +323,14 @@
                     writeToHistory(`${message}`, 'brown');
                 }
                
+                if (arrNav.indexOf(wsUri) < 0) {
+                    arrNav.push(wsUri);
+                    var json_nav_str = JSON.stringify(arrNav);
+                    localStorage.setItem("wsmsservers", json_nav_str);
+                    reloaNav() 
+                }
 
+                localStorage.setItem("wsmsserveractive",wsUri);
                 
 			}
             // Clear the message input
@@ -276,9 +412,7 @@
                     }
                     arr = newarr;
                     var json_str = JSON.stringify(arr);
-                    
                     localStorage.setItem("wsmshistory", json_str);
-                    historyDiv.innerHTML = '';
                     reloadHistory()
 
                 }                
@@ -293,10 +427,10 @@
 	    }
 
 
-
-		
+		initInputOfWeServer()
 		reConnect()
         reloadHistory()
+        reloaNav()
 
     </script>
 </body>

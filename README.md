@@ -23,6 +23,8 @@ where `socket` supports all actions:
 - pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
 - you can remove from `History` any messages by using `X` button.
 
+`Information how to use` is provided by details text which can be expanded or hided when you press on item of page which has this symbol: &#x27A4;
+
 Panel `Histoy of sending unical messages` helps you keep history of messages to re-use those for re-sending when you re-open client or clean up messages. 
 
 You can use this `wsclient.html` with `Firefox`, `Edge` or `Chrome` browsers or any others browsers that support `Local Storage` to let keep your history.
@@ -35,4 +37,6 @@ You can simply clone project from GitHub and start use file `wsclient.html` for 
 git clone https://github.com/lukcad/wsclient.git
 ```
 
-![alt text](image.png)
+![alt text](image-1.png)
+
+![alt text](image-2.png)
