@@ -94,21 +94,20 @@
         var socket;
 		var wsUri;
 
-        var json_str = getCookie('mycookie')? getCookie('mycookie') : '[]';
-        var arr = JSON.parse(json_str);
-        if (json_str === '[]'){
-            json_str = localStorage.getItem("wsmshistory")? localStorage.getItem("wsmshistory") : '[]';
-            var rawarr = JSON.parse(json_str);
 
-            for (let index = 0; index < rawarr.length; index++) {
-                const element = rawarr[index];
-                if (element !== null){
-                    arr.push(element);
-                }
-                
+        var json_str = localStorage.getItem("wsmshistory")? localStorage.getItem("wsmshistory") : '[]';
+        var arrraw = JSON.parse(json_str);
+        var arr = [];
+
+        for (let index = 0; index < arrraw.length; index++) {
+            const element = arrraw[index];
+            if (element !== null){
+                arr.push(element);
             }
             
         }
+            
+        //}
         
 
         function reloadHistory() {
@@ -192,7 +191,6 @@
                     arr.push(message);
                     var json_str = JSON.stringify(arr);
                     localStorage.setItem("wsmshistory", json_str);
-                    createCookie('mycookie', json_str, 99);
                     writeToHistory(`${message}`, 'brown');
                 }
                
@@ -280,7 +278,6 @@
                     var json_str = JSON.stringify(arr);
                     
                     localStorage.setItem("wsmshistory", json_str);
-                    createCookie('mycookie', json_str, 99);
                     historyDiv.innerHTML = '';
                     reloadHistory()
 
@@ -295,33 +292,8 @@
              document.getElementById("output").innerHTML = "";
 	    }
 
-        function createCookie(name, value, days) {
-            var expires;
-            if (days) {
-                var date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toGMTString();
-            }
-            else {
-                expires = "";
-            }
-            document.cookie = name + "=" + value + expires + ";path=/";
-        }
 
-        function getCookie(c_name) {
-            if (document.cookie.length > 0) {
-                c_start = document.cookie.indexOf(c_name + "=");
-                if (c_start != -1) {
-                    c_start = c_start + c_name.length + 1;
-                    c_end = document.cookie.indexOf(";", c_start);
-                    if (c_end == -1) {
-                        c_end = document.cookie.length;
-                    }
-                    return unescape(document.cookie.substring(c_start, c_end));
-                }
-            }
-            return "";
-        }
+
 		
 		reConnect()
         reloadHistory()
