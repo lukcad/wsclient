@@ -16,6 +16,7 @@
 
         .sidenav details summary {
             padding: 4px 4px 14px 0px;
+            font-size: 14px;
             color: #f1f1f1;
         }
 
@@ -35,7 +36,7 @@
         .sidenav a {
             padding: 4px 4px 4px 16px;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
             color: #818181;
             display: block;
             transition: 0.3s;
@@ -75,6 +76,10 @@
             margin: 0px;
         }
 
+        .container details summary {
+            font-size: 14px;
+        }
+
         .container details p {
             margin: 3px;
             font-size: 12px;
@@ -83,7 +88,7 @@
 
         .container p {
             margin: 3px;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         div.topRow {
@@ -115,21 +120,44 @@
 
         }
 
-            /* Darker background on mouse-over */
-            .btn:hover {
+        .btn:hover {
             background-color: RoyalBlue;
         }
-        div.histTop {
-            width:100%;
-            clear:both;
-        }
-        div.histText {
-            width:90%;
-            float:left;
-        }
-        div.histBtn {
 
-            float:right;
+        div.histRow {
+            display: table;
+            padding: 2px;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .histText {
+           
+            padding: 4px 4px;
+            margin: 2px;
+            width: 100%;
+            display: table-cell;
+            background-color: rgb(232, 235, 241);
+            cursor: pointer;
+        }
+        .histText:hover {
+
+            background-color: rgb(179, 199, 240);
+
+        }
+        .histBtn {
+            cursor: pointer;
+      
+            width: auto;
+            padding: 4px 4px;
+            display: table-cell;
+            vertical-align: middle;
+            margin: 2px;
+
+        }
+
+        .histBtn:hover {
+            background-color: rgb(179, 199, 240);
         }
 
         .close {
@@ -157,7 +185,7 @@
     </div>    
     
     <div class="container">
-        <h4><div style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div></h4>
+        <h4><div style="cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div></h4>
         <details><summary>WS Server to interact with messages:</summary>
         <p>You should point here your ws server manually or choose from left navigation panel &#9776; from list of history of previously used WS servers. Once it is done you can use buttons Reconnect ot Diconnest.</p>
         </details>
@@ -165,7 +193,7 @@
         <details><summary>Message:</summary>
         <p>You should enter text message or json message and press Send button to send message to WS server. Notice: previously you should be connected to WS server using button Reconnect</p>
         </details>
-        <textarea rows = "5"  id="messageInput"></textarea></br>
+        <textarea rows = "4"  id="messageInput"></textarea></br>
         <button class="btn" onclick="sendMessage()">Send</button>
 		<button class="btn" onclick="closeConnect()">Disconnect</button>
 		<button class="btn" onclick="reConnect()">Reconnect</button>
@@ -404,41 +432,29 @@
 
         function writeToHistory(message, color = 'black') {
 
-            var histTop = document.createElement("div"); 
-            histTop.style.wordWrap = "break-word"; 
-            histTop.className = "histTop"; 
-                       
-			 var pre = document.createElement("p"); 
-			 pre.style.wordWrap = "break-word"; 
-			 pre.style.color = `${color}`;
-			 pre.innerHTML = message; 
-             pre.onclick = copyToMessage;
+                      
+			 var histText = document.createElement("p"); 
+			 histText.style.wordWrap = "break-word"; 
+			 histText.style.color = `${color}`;
+			 histText.innerHTML = message; 
+             histText.className = "histText";
+             histText.onclick = copyToMessage;
 
-             var delbtn = document.createElement("button"); 
-			 delbtn.className = "btn"; 
+             var delbtn = document.createElement("p"); 
+			 delbtn.className = "histBtn"; 
              delbtn.title = "Delete message from history";
              delbtn.onclick = delMessageFromHistory;
-			 delbtn.innerHTML = "x"; 
+			 delbtn.innerHTML = "&times;"; 
+           
               
-            var histText = document.createElement("div"); 
-            histText.className = "histText"; 
-            histText.appendChild(pre);
-
-
-
-            var preBtn = document.createElement("p"); 
-            preBtn.style.wordWrap = "break-word"; 
-            preBtn.appendChild(delbtn);
-
-            var histBtn = document.createElement("div"); 
-            histBtn.className = "histBtn";              
-            histBtn.appendChild(preBtn); 
-
-            histTop.append(histText, histBtn);
+            var histRow = document.createElement("div"); 
+            histRow.className = "histRow"; 
+            histRow.appendChild(histText);
+            histRow.appendChild(delbtn);
 
             const historyDiv = document
                 .getElementById('history');
-            historyDiv.appendChild(histTop);
+            historyDiv.appendChild(histRow);
 
 
             function copyToMessage(){
