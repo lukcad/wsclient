@@ -16,13 +16,19 @@ where `socket` supports all actions:
 
 - text box to point WS server ( by default it is: `wss://echo.websocket.org` );
 - text box to enter message which you wish to send to WS server;
-- button `Send` - to send message from text box to WS and get response.
+
 - button `Disconnect` to stop connection to WS server.
 - button `Reconnect` to start connection to WS server again after stop.
 - button `Clean Messages` to remove messages from panel `Messages`.
-- pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
-- you can remove any message from `History` of messages by using `X` button  with confirmation prompt.
-- you can remove any WS server from `History WS Servers` by using `X` button with confirmation prompt.
+- button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unical.
+  
+  - pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
+  - you can remove any message from `History` of messages by using `X` button  with confirmation prompt.
+
+- icon &#9776; will open `left side bar` where you can re-choose previously saved successful WS servers:
+
+  - you can choose another server from `History WS Servers` and previouse will be closed and the choosen server will be opened.
+  - you can remove any WS server from `History WS Servers` by using `X` button with confirmation prompt.
 
 `Information how to use` is provided by details text which can be expanded or hided when you press on item of page which has this symbol: &#x27A4;
 

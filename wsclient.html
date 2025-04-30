@@ -160,16 +160,34 @@
             background-color: rgb(179, 199, 240);
         }
 
-        .close {
-            cursor: pointer;
-            position: absolute;
-            right: 0%;
-            padding: 8px 6px;
-            margin: 5px;
-            transform: translate(0%, -50%);
+        div.wshistrow {
+            display: table;
+            padding: 1px;
+            width: 100%;
+            font-size: 12px;  
+            float:right;          
         }
 
-        .close:hover {background: #bbb;}
+        a.wshistname {
+            padding: 4px 4px;
+            margin: 2px;
+            width: 100%;
+            display: table-cell;
+            cursor: pointer;
+        }
+
+        p.wshistclose {
+            cursor: pointer;
+      
+            width: auto;
+            padding: 4px 4px;
+            display: table-cell;
+            vertical-align: middle;
+            margin: 2px;
+  
+        }
+
+        p.wshistclose:hover {background: #bbb;}
 
     </style>
 </head>
@@ -216,6 +234,7 @@
         // and connect to the server
         var socket;
 		var wsUri;
+        var wsUriClosing;
 
         var json_srv_str = localStorage.getItem("wsmsservers")? localStorage.getItem("wsmsservers") : '[]';
         var arrnavraw = JSON.parse(json_srv_str);
@@ -235,30 +254,58 @@
 
 
         function addNavElement(wsserver) {
-            var prenav = document.createElement("a"); 
-            prenav.style.wordWrap = "break-word"; 
-            prenav.href = `javascript:void(0)`;
-            prenav.onclick = chooseWsServer;
-            prenav.title = "Choose this WS server";
-            prenav.innerHTML = `${wsserver}`; 
-            var spandel = document.createElement("span"); 
-            spandel.title = "remove from history";
-            spandel.onclick = removeWsServer;
-            spandel.className = "close";
-            spandel.innerHTML = "&times;";
-            prenav.appendChild(spandel);
+            var wshistname = document.createElement("a"); 
+            wshistname.style.wordWrap = "break-word"; 
+            wshistname.className ="wshistname"
+            wshistname.href = `javascript:void(0)`;
+            wshistname.onclick = chooseWsServer;
+            wshistname.title = "Choose this WS server";
+            wshistname.innerHTML = `${wsserver}`; 
+
+            var wshistclose = document.createElement("p"); 
+            wshistclose.title = "remove from history";
+            wshistclose.onclick = removeWsServer;
+            wshistclose.className = "wshistclose";
+            wshistclose.innerHTML = "&times;";
+        
+
+            var wshistrow = document.createElement("div"); 
+            wshistrow.className = "wshistrow"; 
+            wshistrow.appendChild(wshistname);
+            wshistrow.appendChild(wshistclose);
+
             const barSidenav = document
             .getElementById('listWsServersHistory');
-            barSidenav.appendChild(prenav);
+            barSidenav.appendChild(wshistrow);
+           
 
             function chooseWsServer() {
-                document.getElementById('nameServer').value = wsserver;
+                var anotherserver = false;
+                // if user choosed another server then close existing server
+                if (wsserver !== wsUri) {
+                    closeConnect();
+                    anotherserver = true;
+                }
+                wsUri = document.getElementById('nameServer').value = wsserver;
+
+                if (anotherserver) {
+                    
+                    reConnect();
+                    localStorage.setItem("wsmsserveractive",wsUri);
+                }
+                // close side bar
                 document.getElementById("barSideNav").style.width = "0";
             }
 
             function removeWsServer() {
                 var result = confirm(`Want to delete WS server: "${wsserver}" ?`);
                 if (result) {
+                    var deleteactivews = false;
+                    if (wsserver === wsUri){
+                            console.log('delete active');
+                            deleteactivews = true;
+                            closeConnect();
+                        }                    
                     if (arrNav.indexOf(wsserver) >= 0) {
                         var indextoremove = arrNav.indexOf(wsserver);
                         var newarrnav = [];
@@ -275,19 +322,24 @@
                         }
                         arrNav = newarrnav;
 
+
+
                         var json_nav_str = JSON.stringify(arrNav);
                         localStorage.setItem("wsmsservers", json_nav_str);
-                        reloaNav() 
+  
+                        if (deleteactivews){
+                            document.getElementById("nameServer").value = '';
+                            wsUri = '';
+                            localStorage.setItem("wsmsserveractive",wsUri);
+                        }
+                        reloaNav();
+                        // close side bar
+                        document.getElementById("barSideNav").style.width = "0";
                     }
                 }
             }
         }
-
-        function selectWsServer(wsserver) {
-            document.getElementById('nameServer').value = wsserver;
-            document.getElementById("barSideNav").style.width = "0";
-        }
-        
+      
         function reloaNav() {
             document.getElementById('listWsServersHistory').innerHTML = '';
             arrNav.forEach((item) => {
@@ -366,7 +418,7 @@
             // Log a message when disconnected
             //  from the WebSocket server
             //console.log('Disconnected from WebSocket server');
-			writeToScreen(`You are disconnected from Server "${wsUri}". Code: ${event.code} `, 'red');
+			writeToScreen(`You are disconnected from Server "${wsUriClosing}". Code: ${event.code} `, 'red');
         };
 
 		// Event listener for when the 
@@ -415,6 +467,7 @@
 		
         function closeConnect() {
 			if (socket.readyState === WebSocket.OPEN) {
+                wsUriClosing = wsUri;
 				socket.close();
 			}
 		}	
