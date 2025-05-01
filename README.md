@@ -14,6 +14,12 @@ where `socket` supports all actions:
 
 `Html page` has interactive boxes and buttons to support:
 
+- text box to name specific `WS project` ( if project is not pointed then WS servers and messages are saved in common history which is separate from specific project )
+
+  - if `WS project` is pointed than you can find in left slide menu by icon &#9776; yoour created project in group named as `WS Projects`.
+  - Every project saves succeded `WS servers` in own node and also own history messages. It helps you interact with your `ws sockets` like with projects in `Postman`.
+  - if you don't need project you can delete it. Togethter with project list of ws servers and history that belong to project will be deleted as well.
+
 - text box to point WS server ( by default it is: `wss://echo.websocket.org` );
 - text box to enter message which you wish to send to WS server;
 
@@ -43,7 +49,7 @@ You can simply clone project from GitHub and start use file `wsclient.html` for 
 ```
 git clone https://github.com/lukcad/wsclient.git
 ```
-
+![alt text](image-1.png)
+![alt text](image.png)
+![alt text](image-2.png)
 ![alt text](image-3.png)
-
-![alt text](image-4.png)
