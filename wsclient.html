@@ -174,12 +174,19 @@
             float:right;          
         }
 
-        a.wshistname {
-            padding-left: 14px;
+        p.wshistname {
+            padding-right: 14px;
             margin: 2px;
             width: 100%;
             display: table-cell;
             cursor: pointer;
+            color: rgb(179, 199, 240);
+            word-break: break-all;
+        }
+
+        p.wshistname:hover {
+
+            color: white;
         }
 
         p.wshistclose {
@@ -217,6 +224,8 @@
             margin: 2px;
             width: 100%;
             display: table-cell;
+            word-wrap: break-word;
+            word-break: break-all;
             cursor: pointer;
         }
         p.wsprojectname:hover {
@@ -528,10 +537,10 @@
         function addNavElement(wsserver, wrprojectname) {
 
             var wsproject_id = convertProjectNameToId(wrprojectname)??'';
-            var wshistname = document.createElement("a"); 
+            var wshistname = document.createElement("p"); 
             wshistname.style.wordWrap = "break-word"; 
             wshistname.className ="wshistname"
-            wshistname.href = `javascript:void(0)`;
+           // wshistname.href = `javascript:void(0)`;
             wshistname.onclick = chooseWsServer;
             wshistname.title = "click to choose";
             wshistname.setAttribute("prjname",wrprojectname);
