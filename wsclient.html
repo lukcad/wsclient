@@ -256,7 +256,7 @@
         <p>In this panel you can choose previously created WS Project where you combine relevant ws-servers and relevant messages by the same way how for History but isolated by name of project. Projects have ability to be exported and imported.</p>
         </details>
         <div id="listWsProjects"></div>        
-        <details><summary onclick="swithToHistory()" >History WS servers:</summary>
+        <details ontoggle="showHistoryWsServers()" ><summary >History WS servers:</summary>
         <p>In this panel you can choose previously successfuly used web socket servers that we stored in history of your web browser during your testing. If this list is empty, try send something to demoserver which is proposed by default.</p>
         </details>
         <div id="listWsServersHistory"></div>
@@ -367,16 +367,11 @@
             }
         }
 
-        function swithToHistory() {
-
-            if (wsProjectId != ''){
-                wsProjectName = document.getElementById("nameProject").value = '';
-                setProjectId();
-                setArrHistory();
-                reloadHistory();
-                setArrWSservers();
-                reloaNav(); 
-            }
+        function showHistoryWsServers() {
+            var _wsproject = '';
+            var _wsProjectId = convertProjectNameToId(_wsproject);
+                var _arrNav = getArrWSserversBy(_wsProjectId)??[];
+                reloaNavBy(_wsproject, _arrNav);
 
         }
 
@@ -436,7 +431,7 @@
                   
 
             var wsprojectdetails = document.createElement("details"); 
-            wsprojectdetails.ontoggle = addweservers;
+            wsprojectdetails.ontoggle = showProjectWsServers;
             wsprojectdetails.className = "wsproject";
             wsprojectdetails.appendChild(wsprojectsummary);
             wsprojectdetails.appendChild(wsprojectserverslist);  
@@ -445,7 +440,7 @@
             .getElementById('listWsProjects');
             barSideProjectnav.appendChild(wsprojectdetails);  
             
-            function addweservers() {
+            function showProjectWsServers() {
                 var _wsProjectId = convertProjectNameToId(wsproject);
                 var _arrNav = getArrWSserversBy(_wsProjectId)??[];
                 reloaNavBy(wsproject, _arrNav);
