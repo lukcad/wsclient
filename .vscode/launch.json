@@ -13,6 +13,14 @@
       "name": "Open wsclient.html",
       "file": "wsclient.html"
 
+    },
+    
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Open test.html",
+      "file": "test.html"
+
     }
   ]
 }
