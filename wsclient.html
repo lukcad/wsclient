@@ -261,6 +261,30 @@
             background: #bbb;
         }
 
+        #menuWSProjectsActions {
+            position: absolute;
+            margin: 0;
+            z-index: 2;
+            padding: 0;
+            width: 140px;
+            background-color: white;
+        }
+
+        #menuWSProjectsActions p {
+            height: 18px;
+            border: 1px solid black;
+            margin: 0;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #menuWSProjectsActions p:hover {
+            background-color: #D3D3D3;
+        }
 
 
         #menuProjectActions {
@@ -295,10 +319,10 @@
     <div id="barSideNav" class="sidenav">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <details>
-            <summary>WS projects:</summary>
+            <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS projects:</summary>
             <p>In this panel you can choose previously created WS Project where you combine relevant ws-servers and
                 relevant messages by the same way how for History but isolated by name of project. Projects have ability
-                to be exported and imported.</p>
+                to be exported and imported by pressing on right button when cursor over project name of 'WS Servers'.</p>
         </details>
         <div id="listWsProjects"></div>
         <details ontoggle="showHistoryWsServers()">
@@ -314,13 +338,13 @@
         <h4>
             <div style="cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div>
         </h4>
-        <details>
+        <details >
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers you can later reuse in separate
                 cluster from main history. Give meaningful name of project and run under project any socket and then you
                 can find this name in WS Projects of left side bar.</p>
         </details>
-        <input type="text" id="nameProject" onchange="changeProejct()" value="" /> </br>
+        <input type="text" id="nameProject" onchange="changeProject()" value="" /> </br>
         <details>
             <summary>WS Server to interact with messages:</summary>
             <p>You should point here your ws server manually or choose from left navigation panel &#9776; from list of
@@ -338,11 +362,20 @@
         <button class="btn" onclick="reConnect()">Reconnect</button>
         <button class="btn" onclick="clearScreen()">Clean Messages</button>
 
+        <!--Action menu for WS Porjects title. Hidden and appear only by right click-->
+        <div id="menuWSProjectsActions" style="display: none;">
+            <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project</p>
+            <p id="closeWSProjectsMenu" onclick="clickMenuItemOnWSProjectsActions(event)">Close menu</p>
+        </div>
+
         <!--Action menu for porjects. Hidden and appear only by right click-->
         <div id="menuProjectActions" style="display: none;">
-            <p id="exportProject" onclick="clickMenuItemOrijectAction(event)">Export project</p>
-            <p id="closeProjectMenu" onclick="clickMenuItemOrijectAction(event)">Close menu</p>
+            <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
+            <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
         </div>
+        <!-- hidden button to use for import projects for choosing files-->
+        <input type="file" id="projectimportfiles" onchange="readImportedProjectText(this)" name="files[]" hidden="true"
+            multiple />
 
         <div class="main">
             <div class="topRow"></div>
@@ -478,6 +511,36 @@
                 document.getElementById('nameServer').value = wsUri;
             }
 
+            function openMenuWSProjectsActions(e) {
+
+                e.preventDefault();
+
+                var menu = document.getElementById("menuWSProjectsActions");
+
+                // show 'context menu'
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+                menu.style.display = "block";
+            }
+
+            function clickMenuItemOnWSProjectsActions(et) {
+                // do operations according to context menu here:
+
+                var actionName = et.target.id;
+
+                if (actionName === 'importWSProjects') {
+                    document.getElementById('projectimportfiles').click();
+                }
+
+
+                if (actionName === 'closeWSProjectsMenu') {
+                    // do nothing, because next code close this menu
+                }
+
+                // hide 'context menu'
+                et.target.parentElement.style.display = "none";
+            }
+
             function openMenuProjectActions(e) {
 
                 e.preventDefault();
@@ -495,7 +558,7 @@
                 menu.style.display = "block";
             }
 
-            function clickMenuItemOrijectAction(et) {
+            function clickMenuItemOnProjectActions(et) {
                 // do operations according to context menu here:
                 var _wsprojectname = et.target.title;
                 var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
@@ -526,12 +589,46 @@
                 et.target.parentElement.style.display = "none";
             }
 
+            async function readImportedProjectText(input) {
+                try {
+                    var file = input.files[0];
+                    //var filename = file.name;
+                    var txt = await file.text();
+
+                    var lines = txt.split('\n');
+                    for (var index = 0; index < lines.length; index++) {
+                    var line = lines[index];
+                    if (line.includes('projectname:')) {
+                        var _projectname = line.split('projectname:')[1];
+                        if (_projectname !== '') {
+                            if (arrProjects.indexOf(_projectname) < 0) {
+                                arrProjects.push(_projectname);
+                                var json_prj_str = JSON.stringify(arrProjects);
+                                localStorage.setItem("wsmsprojects", json_prj_str);
+                                reloadProjects();
+                            }
+                        }
+
+                    } else
+                    if (line.includes(':[')) {
+                        var _key = line.split(':[')[0];
+                        var _values = '[' + line.split(':[')[1];
+                        localStorage.setItem(_key, _values);
+
+                    }
+                    }
+
+                } catch (e) {
+                    console.log(e.message);
+                }
+            }
+
             function addProjectElement(wsproject) {
                 var wsprojectname = document.createElement("p");
                 wsprojectname.style.wordWrap = "break-word";
                 wsprojectname.className = "wsprojectname"
                 wsprojectname.onclick = chooseWsProject;
-                wsprojectname.title = "Choose this WS server";
+                wsprojectname.title = "Choose this WS server or press right button to open context menu and export this project";
                 wsprojectname.innerHTML = `${wsproject}`;
                 wsprojectname.oncontextmenu = openMenuProjectActions;
 
@@ -935,7 +1032,7 @@
                 messageInput.value = '';
             }
 
-            function changeProejct() {
+            function changeProject() {
                 setProjectId();
                 setArrHistory();
                 reloadHistory();

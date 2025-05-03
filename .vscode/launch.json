@@ -18,8 +18,8 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Open test.html",
-      "file": "test.html"
+      "name": "Open test3.html",
+      "file": "test/test3.html"
 
     }
   ]

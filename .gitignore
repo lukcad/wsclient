@@ -1,2 +1,5 @@
-test.html
+test*.html
+test
+test/*
+
 
