@@ -483,9 +483,9 @@
             function setArrWSservers() {
                 arrNav = [];
                 var json_srv_str = '[]';
-                if (localStorage.getItem("wsmsservers") !== null ){
-                    if (localStorage.getItem("wsmsservers") !== '') {
-                        json_srv_str = localStorage.getItem("wsmsservers");
+                if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== null ){
+                    if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== '') {
+                        json_srv_str = localStorage.getItem(`${wsProjectId}wsmsservers`);
                     }
                 }
 
@@ -504,9 +504,9 @@
                 _arrNav = [];
 
                 var json_srv_str = '[]';
-                if (localStorage.getItem("wsmsservers") !== null ){
-                    if (localStorage.getItem("wsmsservers") !== '') {
-                        json_srv_str = localStorage.getItem("wsmsservers");
+                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null ){
+                    if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== '') {
+                        json_srv_str = localStorage.getItem(`${_wsProjectId}wsmsservers`);
                     }
                 }
 
