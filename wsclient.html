@@ -68,7 +68,7 @@
             left: 8px;
             color: #818181;
             font-size: 20px;
-            margin-left: 4px;            
+            margin-left: 4px;
         }
 
         .sidenav p {
@@ -322,6 +322,31 @@
         #menuProjectActions p:hover {
             background-color: #D3D3D3;
         }
+
+        #menuHistoryActions {
+            position: absolute;
+            margin: 0;
+            z-index: 2;
+            padding: 0;
+            width: 140px;
+            background-color: white;
+        }
+
+        #menuHistoryActions p {
+            height: 18px;
+            border: 1px solid black;
+            margin: 0;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #menuHistoryActions p:hover {
+            background-color: #D3D3D3;
+        }
     </style>
 </head>
 
@@ -331,14 +356,17 @@
         <b class="copyright">WS LukCAD &copy;</b>
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <details style="padding-top: 24px;">
-            <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS projects:</summary>
+            <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS
+                projects:</summary>
             <p>In this panel you can choose previously created WS Project where you combine relevant ws-servers and
                 relevant messages by the same way how for History but isolated by name of project. Projects have ability
-                to be exported and imported by pressing on right button when cursor over project name of 'WS Projects'.</p>
+                to be exported and imported by pressing on right button when cursor over project name of 'WS Projects'.
+            </p>
         </details>
         <div id="listWsProjects"></div>
         <details ontoggle="showHistoryWsServers()">
-            <summary>History WS servers:</summary>
+            <summary title="press right button to open context menu" oncontextmenu="openMenuHistoryActions(event)">
+                History WS servers:</summary>
             <p>In this panel you can choose previously successfuly used web socket servers that we stored in history of
                 your web browser during your testing. If this list is empty, try send something to demoserver which is
                 proposed by default.</p>
@@ -350,7 +378,7 @@
         <h4>
             <div style="cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div>
         </h4>
-        <details >
+        <details>
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers you can later reuse in separate
                 cluster from main history. Give meaningful name of project and run under project any socket and then you
@@ -376,7 +404,7 @@
 
         <!--Action menu for WS Porjects title. Hidden and appear only by right click-->
         <div id="menuWSProjectsActions" style="display: none;">
-            <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project</p>
+            <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project/history</p>
             <p id="closeWSProjectsMenu" onclick="clickMenuItemOnWSProjectsActions(event)">Close menu</p>
         </div>
 
@@ -385,6 +413,13 @@
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
             <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
         </div>
+
+        <!--Action menu for history. Hidden and appear only by right click-->
+        <div id="menuHistoryActions" style="display: none;">
+            <p id="exportHistory" onclick="clickMenuItemOnHistoryActions(event)">Export history</p>
+            <p id="closeHistoryMenu" onclick="clickMenuItemOnHistoryActions(event)">Close menu</p>
+        </div>
+
         <!-- hidden button to use for import projects for choosing files-->
         <input type="file" id="projectimportfiles" onchange="readImportedProjectText(this)" name="files[]" hidden="true"
             multiple />
@@ -601,6 +636,49 @@
                 et.target.parentElement.style.display = "none";
             }
 
+            function openMenuHistoryActions(e) {
+
+                e.preventDefault();
+
+                var menu = document.getElementById("menuHistoryActions");
+
+                // show 'context menu'
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+                menu.style.display = "block";
+            }
+
+            function clickMenuItemOnHistoryActions(et) {
+                // do operations according to context menu here:
+                var _wsprojectname = '';
+                var _wsprojectid = '';
+                var actionName = et.target.id;
+
+                if (actionName === 'exportHistory') {
+                    // here we create dynamically file and save it
+                    var link = document.createElement("a");
+                    var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
+                    var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
+                    var content = `projectname:${_wsprojectname}\n`
+                        + `projectid:${_wsprojectid}\n`
+                        + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
+                        + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
+                    const file = new Blob([content], { type: 'text/plain' });
+                    link.href = URL.createObjectURL(file);
+                    link.download = `wshistory_.wsclient`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                }
+
+
+                if (actionName === 'closeHistoryMenu') {
+                    // do nothing, because next code close this menu
+                }
+
+                // hide 'context menu'
+                et.target.parentElement.style.display = "none";
+            }
+
             async function readImportedProjectText(input) {
                 try {
                     var file = input.files[0];
@@ -608,26 +686,56 @@
                     var txt = await file.text();
 
                     var lines = txt.split('\n');
+                    var _projectname = '';
                     for (var index = 0; index < lines.length; index++) {
-                    var line = lines[index];
-                    if (line.includes('projectname:')) {
-                        var _projectname = line.split('projectname:')[1];
-                        if (_projectname !== '') {
-                            if (arrProjects.indexOf(_projectname) < 0) {
-                                arrProjects.push(_projectname);
-                                var json_prj_str = JSON.stringify(arrProjects);
-                                localStorage.setItem("wsmsprojects", json_prj_str);
-                                reloadProjects();
+                        var line = lines[index];
+
+                        if (line.includes('projectname:')) {
+                            _projectname = line.split('projectname:')[1];
+                            if (_projectname !== '') {
+                                if (arrProjects.indexOf(_projectname) < 0) {
+                                    arrProjects.push(_projectname);
+                                    var json_prj_str = JSON.stringify(arrProjects);
+                                    localStorage.setItem("wsmsprojects", json_prj_str);
+                                    reloadProjects();
+                                }
                             }
-                        }
+                            else {
+                                ishistory = true;
+                            }
 
-                    } else
-                    if (line.includes(':[')) {
-                        var _key = line.split(':[')[0];
-                        var _values = '[' + line.split(':[')[1];
-                        localStorage.setItem(_key, _values);
+                        } else
+                            if (line.includes(':[')) {
 
-                    }
+                                var _key = line.split(':[')[0];
+                                var _values = '[' + line.split(':[')[1];
+                                if ((localStorage.getItem(_key) ?? '') === '') {
+                                    // import new key
+                                    localStorage.setItem(_key, _values);
+                                    if (_key.includes('wsmsservers')) {
+                                        // reload Navigation actoss servers in left side menu
+                                        reloaNavBy(_projectname, _values);
+                                    }                                    
+                                } else {
+                                    
+                                        // enrich existing _key
+                                        var _arr_new = JSON.parse(_values);
+                                        var _existing_str = localStorage.getItem(`${_key}`) ? localStorage.getItem(`${_key}`) : '[]';
+                    
+                                        var _arr_existing = JSON.parse(_existing_str);
+                                        _arr_new.forEach(element => {
+                                            if (_arr_existing.indexOf(element) < 0) {
+                                                _arr_existing.push(element);
+                                            }
+                                        });
+                                        var json_merged_str = JSON.stringify(_arr_existing);
+                                        localStorage.setItem(_key, json_merged_str);
+                                    if (_key.includes('wsmsservers')) {
+                                        // reload Navigation actoss servers in left side menu
+                                        reloaNavBy(_projectname, _arr_existing);
+                                    }
+                                }
+                            }
                     }
 
                 } catch (e) {
