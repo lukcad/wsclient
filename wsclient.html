@@ -462,7 +462,12 @@
             // left bar navigation for `WS projects`
 
             var arrProjects = [];
-            var json_projects_str = localStorage.getItem("wsmsprojects") ? localStorage.getItem("wsmsprojects") : '[]';
+            var json_projects_str = '[]';
+            if (localStorage.getItem("wsmsprojects") !== null ){
+                if (localStorage.getItem("wsmsprojects") !== '') {
+                    json_projects_str = localStorage.getItem("wsmsprojects");
+                }
+            }
             var arrProjectsraw = JSON.parse(json_projects_str);
 
             for (let index = 0; index < arrProjectsraw.length; index++) {
@@ -477,7 +482,13 @@
 
             function setArrWSservers() {
                 arrNav = [];
-                var json_srv_str = localStorage.getItem(`${wsProjectId}wsmsservers`) ? localStorage.getItem(`${wsProjectId}wsmsservers`) : '[]';
+                var json_srv_str = '[]';
+                if (localStorage.getItem("wsmsservers") !== null ){
+                    if (localStorage.getItem("wsmsservers") !== '') {
+                        json_srv_str = localStorage.getItem("wsmsservers");
+                    }
+                }
+
                 var arrnavraw = JSON.parse(json_srv_str);
 
 
@@ -491,7 +502,14 @@
 
             function getArrWSserversBy(_wsProjectId) {
                 _arrNav = [];
-                var json_srv_str = localStorage.getItem(`${_wsProjectId}wsmsservers`) ? localStorage.getItem(`${_wsProjectId}wsmsservers`) : '[]';
+
+                var json_srv_str = '[]';
+                if (localStorage.getItem("wsmsservers") !== null ){
+                    if (localStorage.getItem("wsmsservers") !== '') {
+                        json_srv_str = localStorage.getItem("wsmsservers");
+                    }
+                }
+
                 var arrnavraw = JSON.parse(json_srv_str);
 
 
@@ -509,7 +527,14 @@
 
             function setArrHistory() {
                 arr = [];
-                var json_str = localStorage.getItem(`${wsProjectId}wsmshistory`) ? localStorage.getItem(`${wsProjectId}wsmshistory`) : '[]';
+
+                var json_str = '[]';
+                if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== null ){
+                    if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== '') {
+                        json_str = localStorage.getItem(`${wsProjectId}wsmshistory`);
+                    }
+                }
+
                 var arrraw = JSON.parse(json_str);
 
 
@@ -548,13 +573,23 @@
             }
 
             function initProjectNameAndId() {
-                wsProjectName = localStorage.getItem("wsmsprojectactive") ? localStorage.getItem("wsmsprojectactive") : '';
+                wsProjectName = '';
+                if (localStorage.getItem("wsmsprojectactive") !== null ){
+                        wsProjectName = localStorage.getItem("wsmsprojectactive");
+                }
+
                 document.getElementById('nameProject').value = wsProjectName;
                 setProjectId();
             }
 
             function initInputOfWeServer() {
-                wsUri = localStorage.getItem("wsmsserveractive") ? localStorage.getItem("wsmsserveractive") : 'wss://echo.websocket.org';
+
+                wsUri = 'wss://echo.websocket.org';
+
+                if (localStorage.getItem("wsmsserveractive") !== null ){
+                    wsUri = localStorage.getItem("wsmsserveractive");
+                }
+
                 document.getElementById('nameServer').value = wsUri;
             }
 
@@ -700,27 +735,32 @@
                                     reloadProjects();
                                 }
                             }
-                            else {
-                                ishistory = true;
-                            }
 
                         } else
                             if (line.includes(':[')) {
 
                                 var _key = line.split(':[')[0];
                                 var _values = '[' + line.split(':[')[1];
-                                if ((localStorage.getItem(_key) ?? '') === '') {
+                                if (localStorage.getItem(_key) === null) {
                                     // import new key
                                     localStorage.setItem(_key, _values);
                                     if (_key.includes('wsmsservers')) {
                                         // reload Navigation actoss servers in left side menu
-                                        reloaNavBy(_projectname, _values);
-                                    }                                    
+                                        var _arr_new = JSON.parse(_values);
+                                        reloaNavBy(_projectname, _arr_new);
+                                    } 
+                                  
                                 } else {
                                     
                                         // enrich existing _key
                                         var _arr_new = JSON.parse(_values);
-                                        var _existing_str = localStorage.getItem(`${_key}`) ? localStorage.getItem(`${_key}`) : '[]';
+                                        var _existing_str = '[]';
+                                        if ( localStorage.getItem(`${_key}`) !== null ) {
+                                            if ( localStorage.getItem(`${_key}`) !== '' ) {
+                                                _existing_str = localStorage.getItem(`${_key}`);
+                                            }
+                                        }
+
                     
                                         var _arr_existing = JSON.parse(_existing_str);
                                         _arr_new.forEach(element => {
@@ -734,6 +774,7 @@
                                         // reload Navigation actoss servers in left side menu
                                         reloaNavBy(_projectname, _arr_existing);
                                     }
+
                                 }
                             }
                     }
@@ -807,6 +848,9 @@
                         setArrWSservers();
                         reloaNav();
 
+                    } else {
+                        setArrHistory();
+                        reloadHistory();
                     }
                     // close side bar
                     document.getElementById("barSideNav").style.width = "0";
@@ -924,6 +968,9 @@
                         setProjectId();
                         setArrHistory();
                         reloadHistory();
+                    } else {
+                        setArrHistory();
+                        reloadHistory();                        
                     }
                     // close side bar
                     document.getElementById("barSideNav").style.width = "0";

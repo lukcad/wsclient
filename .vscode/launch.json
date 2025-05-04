@@ -10,16 +10,16 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Open wsclient.html",
+      "name": "Chrome wsclient.html",
       "file": "wsclient.html"
 
     },
     
     {
-      "type": "chrome",
+      "type": "msedge",
       "request": "launch",
-      "name": "Open test3.html",
-      "file": "test/test3.html"
+      "name": "Edge wsclient.html",
+      "file": "wsclient.html"
 
     }
   ]
