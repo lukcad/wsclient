@@ -54,10 +54,21 @@
 
         .sidenav .closebtn {
             position: absolute;
+            padding-top: 0px;
             top: 0;
-            right: 5px;
+            right: 2px;
             font-size: 34px;
             margin-left: 100px;
+        }
+
+        .sidenav .copyright {
+            position: absolute;
+            padding-top: 8px;
+            top: 0;
+            left: 8px;
+            color: #818181;
+            font-size: 20px;
+            margin-left: 4px;            
         }
 
         .sidenav p {
@@ -317,12 +328,13 @@
 <body>
 
     <div id="barSideNav" class="sidenav">
+        <b class="copyright">WS LukCAD &copy;</b>
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <details>
+        <details style="padding-top: 24px;">
             <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS projects:</summary>
             <p>In this panel you can choose previously created WS Project where you combine relevant ws-servers and
                 relevant messages by the same way how for History but isolated by name of project. Projects have ability
-                to be exported and imported by pressing on right button when cursor over project name of 'WS Servers'.</p>
+                to be exported and imported by pressing on right button when cursor over project name of 'WS Projects'.</p>
         </details>
         <div id="listWsProjects"></div>
         <details ontoggle="showHistoryWsServers()">
