@@ -611,7 +611,10 @@
                 var actionName = et.target.id;
 
                 if (actionName === 'importWSProjects') {
-                    document.getElementById('projectimportfiles').click();
+                    if (document.getElementById('projectimportfiles') !== null){
+                        document.getElementById('projectimportfiles').value = null;
+                        document.getElementById('projectimportfiles').click();
+                    }
                 }
 
 
@@ -726,7 +729,8 @@
                         var line = lines[index];
 
                         if (line.includes('projectname:')) {
-                            _projectname = line.split('projectname:')[1];
+                           
+                            _projectname = (line.split('projectname:')[1])??'';
                             if (_projectname !== '') {
                                 if (arrProjects.indexOf(_projectname) < 0) {
                                     arrProjects.push(_projectname);
@@ -738,11 +742,11 @@
 
                         } else
                             if (line.includes(':[')) {
-
+                                
                                 var _key = line.split(':[')[0];
                                 var _values = '[' + line.split(':[')[1];
                                 if (localStorage.getItem(_key) === null) {
-                                    // import new key
+                                    // import the whole list of wsmsservers because it is a new _key
                                     localStorage.setItem(_key, _values);
                                     if (_key.includes('wsmsservers')) {
                                         // reload Navigation actoss servers in left side menu
@@ -752,29 +756,29 @@
                                   
                                 } else {
                                     
-                                        // enrich existing _key
-                                        var _arr_new = JSON.parse(_values);
-                                        var _existing_str = '[]';
-                                        if ( localStorage.getItem(`${_key}`) !== null ) {
-                                            if ( localStorage.getItem(`${_key}`) !== '' ) {
-                                                _existing_str = localStorage.getItem(`${_key}`);
-                                            }
+                                    // enrich existing _key by values from list of wsmsservers
+                                    var _arr_new = JSON.parse(_values);
+                                    var _existing_str = '[]';
+                                    if ( localStorage.getItem(`${_key}`) !== null ) {
+                                        if ( localStorage.getItem(`${_key}`) !== '' ) {
+                                            _existing_str = localStorage.getItem(`${_key}`);
                                         }
+                                    }
+                
+                                    var _arr_existing = JSON.parse(_existing_str);
+                                    _arr_new.forEach(element => {
+                                        if (_arr_existing.indexOf(element) < 0) {
+                                            _arr_existing.push(element);
+                                        }
+                                    });
 
-                    
-                                        var _arr_existing = JSON.parse(_existing_str);
-                                        _arr_new.forEach(element => {
-                                            if (_arr_existing.indexOf(element) < 0) {
-                                                _arr_existing.push(element);
-                                            }
-                                        });
-                                        var json_merged_str = JSON.stringify(_arr_existing);
-                                        localStorage.setItem(_key, json_merged_str);
+                                    var json_merged_str = JSON.stringify(_arr_existing);
+                                    localStorage.setItem(_key, json_merged_str);
+
                                     if (_key.includes('wsmsservers')) {
                                         // reload Navigation actoss servers in left side menu
                                         reloaNavBy(_projectname, _arr_existing);
                                     }
-
                                 }
                             }
                     }
@@ -883,15 +887,21 @@
                             localStorage.setItem("wsmsprojects", json_projects_str);
 
                             if (_wsProjectId !== '') {
-                                if (localStorage.getItem(`${_wsProjectId}listWsServersHistory`)) {
-                                    localStorage.removeItem(`${_wsProjectId}listWsServersHistory`);
+                                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
+                                    localStorage.removeItem(`${_wsProjectId}wsmsservers`);
                                 }
-                                if (localStorage.getItem(`${_wsProjectId}wsmshistory`)) {
+                                if (localStorage.getItem(`${_wsProjectId}wsmshistory`) !== null) {
                                     localStorage.removeItem(`${_wsProjectId}wsmshistory`);
                                 }
                             }
 
-                            this.parentElement.parentElement.remove();
+                            if (this.parentElement.parentElement !== null){
+                                if (this.parentElement.parentElement.parentElement != null){
+                                    this.parentElement.parentElement.parentElement.remove();
+                                }
+                            }
+
+                            
 
                             if (deleteactivews) {
 
@@ -1054,10 +1064,14 @@
 
             function reloaNavBy(_wsProjectName, _arrNav) {
                 var _wsProjectId = convertProjectNameToId(_wsProjectName) ?? '';
-                document.getElementById(`${_wsProjectId}listWsServersHistory`).innerHTML = '';
-                _arrNav.forEach((item) => {
+                if ( document.getElementById(`${_wsProjectId}listWsServersHistory`) !== null) {
+                    document.getElementById(`${_wsProjectId}listWsServersHistory`).innerHTML = '';
+                    _arrNav.forEach((item) => {
                     addNavElement(`${item}`, `${_wsProjectName}`);
                 })
+                }
+                
+
             }
 
             function reloadProjects() {
