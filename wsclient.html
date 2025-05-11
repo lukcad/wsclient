@@ -116,11 +116,15 @@
         div.leftCol {
             width: 50%;
             float: left;
+            word-wrap: break-word;
+            word-break: break-all;            
         }
 
         div.rightCol {
             width: 50%;
             float: right;
+            word-wrap: break-word;
+            word-break: break-all;            
         }
 
         input {
@@ -165,7 +169,6 @@
         .histText:hover {
 
             background-color: rgb(179, 199, 240);
-
         }
 
         .histBtn {
@@ -176,7 +179,6 @@
             display: table-cell;
             vertical-align: middle;
             margin: 2px;
-
         }
 
         .histBtn:hover {
@@ -214,7 +216,6 @@
             display: table-cell;
             vertical-align: middle;
             margin: 2px;
-
         }
 
         p.wshistclose:hover {
@@ -512,7 +513,6 @@
 
                 var arrnavraw = JSON.parse(json_srv_str);
 
-
                 for (let index = 0; index < arrnavraw.length; index++) {
                     const element = arrnavraw[index];
                     if (element !== null) {
@@ -543,7 +543,6 @@
                     if (element !== null) {
                         arr.push(element);
                     }
-
                 }
             }
 
@@ -552,10 +551,7 @@
                 var _wsProjectId = convertProjectNameToId(_wsproject);
                 var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
                 reloaNavBy(_wsproject, _arrNav);
-
             }
-
-
 
             function setProjectId() {
 
