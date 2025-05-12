@@ -404,19 +404,19 @@
         <button class="btn" onclick="clearScreen()">Clean Messages</button>
 
         <!--Action menu for WS Porjects title. Hidden and appear only by right click-->
-        <div id="menuWSProjectsActions" style="display: none;">
+        <div id="menuWSProjectsActions" class="dropdownmenu" style="display: none;">
             <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project/history</p>
             <p id="closeWSProjectsMenu" onclick="clickMenuItemOnWSProjectsActions(event)">Close menu</p>
         </div>
 
         <!--Action menu for porjects. Hidden and appear only by right click-->
-        <div id="menuProjectActions" style="display: none;">
+        <div id="menuProjectActions" class="dropdownmenu" style="display: none;">
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
             <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
         </div>
 
         <!--Action menu for history. Hidden and appear only by right click-->
-        <div id="menuHistoryActions" style="display: none;">
+        <div id="menuHistoryActions" class="dropdownmenu" style="display: none;">
             <p id="exportHistory" onclick="clickMenuItemOnHistoryActions(event)">Export history</p>
             <p id="closeHistoryMenu" onclick="clickMenuItemOnHistoryActions(event)">Close menu</p>
         </div>
@@ -589,11 +589,26 @@
                 document.getElementById('nameServer').value = wsUri;
             }
 
+            function closeDropDownLists(exceptmenuwithid) {
+                // close other elements with class "dropdownmenu"
+                var dropdownmenues = document.getElementsByClassName("dropdownmenu");
+                for (let index = 0; index < dropdownmenues.length; index++) {
+                    const element_menu = dropdownmenues[index];
+                    if ( exceptmenuwithid !== element_menu){
+                        element_menu.style.display = "none";
+                    }
+                    
+                }
+            }
+
             function openMenuWSProjectsActions(e) {
 
                 e.preventDefault();
 
                 var menu = document.getElementById("menuWSProjectsActions");
+
+                // close other elements with class "dropdownmenu"
+                closeDropDownLists(menu.id);  
 
                 // show 'context menu'
                 menu.style.left = e.pageX + "px";
@@ -627,6 +642,9 @@
                 e.preventDefault();
 
                 var menu = document.getElementById("menuProjectActions");
+
+                // close other elements with class "dropdownmenu"
+                closeDropDownLists(menu.id);  
 
                 // add title in itmes of menu according to target (target here is souce of event)
                 var _wsprojectname = e.target.innerHTML;
@@ -675,6 +693,9 @@
                 e.preventDefault();
 
                 var menu = document.getElementById("menuHistoryActions");
+
+                // close other elements with class "dropdownmenu"
+                closeDropDownLists(menu.id);             
 
                 // show 'context menu'
                 menu.style.left = e.pageX + "px";
@@ -853,7 +874,7 @@
                         reloadHistory();
                     }
                     // close side bar
-                    document.getElementById("barSideNav").style.width = "0";
+                    closeNav();
                 }
 
                 function removeWsProject() {
@@ -912,7 +933,7 @@
                             }
 
                             // close side bar
-                            document.getElementById("barSideNav").style.width = "0";
+                            closeNav();
                         }
                     }
                 }
@@ -979,7 +1000,7 @@
                         reloadHistory();                        
                     }
                     // close side bar
-                    document.getElementById("barSideNav").style.width = "0";
+                    closeNav();
                 }
 
                 function removeWsServer() {
@@ -1046,7 +1067,7 @@
                         }
 
 
-                        document.getElementById("barSideNav").style.width = "0";
+                        closeNav();
                     }
                 }
             }
@@ -1079,10 +1100,15 @@
 
             function openNav() {
                 document.getElementById("barSideNav").style.width = "250px";
+
             }
+
+            
+
 
             function closeNav() {
                 document.getElementById("barSideNav").style.width = "0";
+                closeDropDownLists('');
             }
 
             function reloadHistory() {
