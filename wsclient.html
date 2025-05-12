@@ -298,6 +298,16 @@
             background-color: #D3D3D3;
         }
 
+        #menuWSProjectsActions b {
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ddf316;
+            background-color: rgb(99, 87, 87);
+        }
+
 
         #menuProjectActions {
             position: absolute;
@@ -324,6 +334,16 @@
             background-color: #D3D3D3;
         }
 
+        #menuProjectActions b {
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ddf316;
+            background-color: rgb(99, 87, 87);
+        }        
+
         #menuHistoryActions {
             position: absolute;
             margin: 0;
@@ -348,6 +368,16 @@
         #menuHistoryActions p:hover {
             background-color: #D3D3D3;
         }
+
+        #menuHistoryActions b {
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ddf316;
+            background-color: rgb(99, 87, 87);
+        }  
     </style>
 </head>
 
@@ -405,18 +435,21 @@
 
         <!--Action menu for WS Porjects title. Hidden and appear only by right click-->
         <div id="menuWSProjectsActions" class="dropdownmenu" style="display: none;">
+            <b id="namemenuWSProjectsActions"></b>
             <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project/history</p>
             <p id="closeWSProjectsMenu" onclick="clickMenuItemOnWSProjectsActions(event)">Close menu</p>
         </div>
 
         <!--Action menu for porjects. Hidden and appear only by right click-->
         <div id="menuProjectActions" class="dropdownmenu" style="display: none;">
+            <b id="namemenuProjectActions"></b>
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
             <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
         </div>
 
         <!--Action menu for history. Hidden and appear only by right click-->
         <div id="menuHistoryActions" class="dropdownmenu" style="display: none;">
+            <b id="namemenuHistoryActions"></b>
             <p id="exportHistory" onclick="clickMenuItemOnHistoryActions(event)">Export history</p>
             <p id="closeHistoryMenu" onclick="clickMenuItemOnHistoryActions(event)">Close menu</p>
         </div>
@@ -608,7 +641,10 @@
                 var menu = document.getElementById("menuWSProjectsActions");
 
                 // close other elements with class "dropdownmenu"
-                closeDropDownLists(menu.id);  
+                closeDropDownLists(menu.id); 
+                
+                // write title of menu
+                document.getElementById("namemenuWSProjectsActions").innerHTML = 'WS Projects';
 
                 // show 'context menu'
                 menu.style.left = e.pageX + "px";
@@ -650,6 +686,9 @@
                 var _wsprojectname = e.target.innerHTML;
                 document.getElementById("exportProject").title = _wsprojectname ?? '';
                 document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
+
+                // write title of menu
+                document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;                  
 
                 // show 'context menu'
                 menu.style.left = e.pageX + "px";
@@ -695,7 +734,10 @@
                 var menu = document.getElementById("menuHistoryActions");
 
                 // close other elements with class "dropdownmenu"
-                closeDropDownLists(menu.id);             
+                closeDropDownLists(menu.id); 
+                
+                // write title of menu
+                document.getElementById("namemenuHistoryActions").innerHTML = 'History WS servers';                   
 
                 // show 'context menu'
                 menu.style.left = e.pageX + "px";
