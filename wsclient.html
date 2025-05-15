@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="keywords" content="web socket, WebSocket, wsclient, web socket client, lukcad, LukCAD">
+    <meta name="author" content="Mikhail Lukyanau">
     <title>WebSocket Client by LUKCAD</title>
     <style>
         body {
@@ -80,7 +82,8 @@
             transition: 0.3s;
         }
 
-        h4 {
+        .container h4 {
+            white-space: nowrap;
             color: green;
         }
 
@@ -107,6 +110,76 @@
             margin: 3px;
             font-size: 12px;
         }
+
+        .appnamewithrelease {
+            white-space: nowrap;
+        }
+
+        .appnamewithrelease > div {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        .newreleasebadge {
+            background-color: red;
+            color: white;
+            padding: 4px 8px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #release {
+            display:inline-block;
+        }
+
+        .newreleasebadge .newReleasePopup {
+            visibility: hidden;
+            background-color: #cac707;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            top: 125%;
+            left: 40%;
+            margin-left: -80px;
+        }
+
+        .newreleasebadge .newReleasePopup::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 40%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #cac707 transparent;
+        }
+
+        .newreleasebadge .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s;
+        }
+
+        /* Add animation (fade in the popup) */
+        @-webkit-keyframes fadeIn {
+            from {opacity: 0;} 
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity:1 ;}
+        }        
 
         div.topRow {
             width: 100%;
@@ -406,9 +479,12 @@
     </div>
 
     <div class="container">
-        <h4>
-            <div style="cursor:pointer" onclick="openNav()">&#9776; WebSocket Client</div>
-        </h4>
+        
+            
+        <div class="appnamewithrelease">
+            <div style="cursor:pointer;white-space: nowrap" onclick="openNav()"><h4>&#9776; WebSocket Client</h4></div><div id="release" >v1.0.27</div><div id="newrelease"></div>
+        </div>
+     
         <details>
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers you can later reuse in separate
@@ -483,6 +559,67 @@
             </div>
         </div>
         <script>
+            
+            // create client to be able check new version of wsclient
+            var HttpClient = function() {
+                this.get = function(aUrl, aCallback) {
+                    var anHttpRequest = new XMLHttpRequest();
+                    anHttpRequest.onreadystatechange = function() { 
+                        if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                            aCallback(anHttpRequest.responseText);
+                    }
+
+                    anHttpRequest.open( "GET", aUrl, true );            
+                    anHttpRequest.send( null );
+                }
+            }
+
+            var maxRelease = '';
+
+            var client = new HttpClient();
+                client.get('https://api.github.com/repos/lukcad/wsclient/releases', function(response) {
+                // do something with response
+                try {
+                    //console.log(response);
+                    var respObj = JSON.parse(response) ?? [];
+                    for (let index = 0; index < respObj.length; index++) {
+                        var releasename = respObj[index].name;
+                        if (releasename > maxRelease) {
+                            maxRelease = releasename;
+                        }
+                    }
+                    console.log(maxRelease);
+                    var curRelease = document.getElementById("release").innerHTML ?? '';
+                    if (maxRelease !== ''){
+                        if (maxRelease > curRelease) {
+
+                            var newReleasePopup = document.createElement("span");
+                            newReleasePopup.id = "newReleasePopup";
+                            newReleasePopup.className = "newReleasePopup";
+                            newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull new version from <b>gitHub</b>`;
+
+
+                          
+                            var newRelease = document.getElementById("newrelease");
+                            newRelease.className = "newreleasebadge";
+                            newRelease.onclick = toogleNewReleasePopup;
+                            newRelease.innerHTML = 'New';
+                            newRelease.appendChild(newReleasePopup);
+
+                            function toogleNewReleasePopup() {
+                                var popup = document.getElementById("newReleasePopup");
+                                popup.classList.toggle("show");
+                            }
+                            
+                        }
+                    }
+                } catch (error) {
+                    console.log('error to read version from gitHub project...');
+                }
+                
+            });
+
+
             // Create a WebSocket instance
             // and connect to the server
             var socket;
