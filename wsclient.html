@@ -115,7 +115,7 @@
             white-space: nowrap;
         }
 
-        .appnamewithrelease > div {
+        .appnamewithrelease>div {
             display: inline-block;
             margin-right: 10px;
         }
@@ -136,7 +136,7 @@
         }
 
         #release {
-            display:inline-block;
+            display: inline-block;
         }
 
         .newreleasebadge .newReleasePopup {
@@ -172,14 +172,24 @@
 
         /* Add animation (fade in the popup) */
         @-webkit-keyframes fadeIn {
-            from {opacity: 0;} 
-            to {opacity: 1;}
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes fadeIn {
-            from {opacity: 0;}
-            to {opacity:1 ;}
-        }        
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
 
         div.topRow {
             width: 100%;
@@ -190,14 +200,14 @@
             width: 50%;
             float: left;
             word-wrap: break-word;
-            word-break: break-all;            
+            word-break: break-all;
         }
 
         div.rightCol {
             width: 50%;
             float: right;
             word-wrap: break-word;
-            word-break: break-all;            
+            word-break: break-all;
         }
 
         input {
@@ -415,7 +425,7 @@
             justify-content: center;
             color: #ddf316;
             background-color: rgb(99, 87, 87);
-        }        
+        }
 
         #menuHistoryActions {
             position: absolute;
@@ -450,7 +460,7 @@
             justify-content: center;
             color: #ddf316;
             background-color: rgb(99, 87, 87);
-        }  
+        }
     </style>
 </head>
 
@@ -479,12 +489,15 @@
     </div>
 
     <div class="container">
-        
-            
+
         <div class="appnamewithrelease">
-            <div style="cursor:pointer;white-space: nowrap" onclick="openNav()"><h4>&#9776; WebSocket Client</h4></div><div id="release" >v1.0.27</div><div id="newrelease"></div>
+            <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
+                <h4>&#9776; WebSocket Client</h4>
+            </div>
+            <div id="release">v1.0.27RC</div>
+            <div id="newrelease"></div>
         </div>
-     
+
         <details>
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers you can later reuse in separate
@@ -558,958 +571,956 @@
                 </div>
             </div>
         </div>
-        <script>
-            
-            // create client to be able check new version of wsclient
-            var HttpClient = function() {
-                this.get = function(aUrl, aCallback) {
-                    var anHttpRequest = new XMLHttpRequest();
-                    anHttpRequest.onreadystatechange = function() { 
-                        if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
-                            aCallback(anHttpRequest.responseText);
-                    }
+    </div>
 
-                    anHttpRequest.open( "GET", aUrl, true );            
-                    anHttpRequest.send( null );
+    <script>
+
+        // create client to be able check new version of wsclient
+        var HttpClient = function () {
+            this.get = function (aUrl, aCallback) {
+                var anHttpRequest = new XMLHttpRequest();
+                anHttpRequest.onreadystatechange = function () {
+                    if (anHttpRequest.readyState == 4 && anHttpRequest.status == 200)
+                        aCallback(anHttpRequest.responseText);
+                }
+
+                anHttpRequest.open("GET", aUrl, true);
+                anHttpRequest.send(null);
+            }
+        }
+
+        var maxRelease = '';
+
+        var client = new HttpClient();
+        client.get('https://api.github.com/repos/lukcad/wsclient/releases', function (response) {
+
+            // read info about releases of wslclient
+            try {
+                var respObj = JSON.parse(response) ?? [];
+                for (let index = 0; index < respObj.length; index++) {
+                    var releasename = respObj[index].name;
+                    if (releasename > maxRelease) {
+                        maxRelease = releasename;
+                    }
+                }
+                console.log(maxRelease);
+                var curRelease = document.getElementById("release").innerHTML ?? '';
+                if (maxRelease !== '') {
+                    if (maxRelease > curRelease) {
+
+                        var newReleasePopup = document.createElement("span");
+                        newReleasePopup.id = "newReleasePopup";
+                        newReleasePopup.className = "newReleasePopup";
+                        newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull new version from <b>gitHub</b>`;
+
+                        var newRelease = document.getElementById("newrelease");
+                        newRelease.className = "newreleasebadge";
+                        newRelease.onclick = toogleNewReleasePopup;
+                        newRelease.innerHTML = 'New';
+                        newRelease.appendChild(newReleasePopup);
+
+                        function toogleNewReleasePopup() {
+                            var popup = document.getElementById("newReleasePopup");
+                            popup.classList.toggle("show");
+                        }
+
+                    }
+                }
+            } catch (error) {
+                console.log('error to read version from gitHub project...');
+            }
+
+        });
+
+
+        // Create a WebSocket instance
+        // and connect to the server
+        var socket;
+        var wsUri;
+        var wsUriClosing;
+        var wsProjectId;
+        var wsProjectName;
+
+        initProjectNameAndId()
+
+        // left bar navigation for `WS projects`
+
+        var arrProjects = [];
+        var json_projects_str = '[]';
+        if (localStorage.getItem("wsmsprojects") !== null) {
+            if (localStorage.getItem("wsmsprojects") !== '') {
+                json_projects_str = localStorage.getItem("wsmsprojects");
+            }
+        }
+        var arrProjectsraw = JSON.parse(json_projects_str);
+
+        for (let index = 0; index < arrProjectsraw.length; index++) {
+            const element = arrProjectsraw[index];
+            if (element !== null) {
+                arrProjects.push(element);
+            }
+        }
+
+        // left bar navigation for `History WS servers`
+        var arrNav;
+
+        function setArrWSservers() {
+            arrNav = [];
+            var json_srv_str = '[]';
+            if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== null) {
+                if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== '') {
+                    json_srv_str = localStorage.getItem(`${wsProjectId}wsmsservers`);
                 }
             }
 
-            var maxRelease = '';
-
-            var client = new HttpClient();
-                client.get('https://api.github.com/repos/lukcad/wsclient/releases', function(response) {
-                // do something with response
-                try {
-                    //console.log(response);
-                    var respObj = JSON.parse(response) ?? [];
-                    for (let index = 0; index < respObj.length; index++) {
-                        var releasename = respObj[index].name;
-                        if (releasename > maxRelease) {
-                            maxRelease = releasename;
-                        }
-                    }
-                    console.log(maxRelease);
-                    var curRelease = document.getElementById("release").innerHTML ?? '';
-                    if (maxRelease !== ''){
-                        if (maxRelease > curRelease) {
-
-                            var newReleasePopup = document.createElement("span");
-                            newReleasePopup.id = "newReleasePopup";
-                            newReleasePopup.className = "newReleasePopup";
-                            newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull new version from <b>gitHub</b>`;
+            var arrnavraw = JSON.parse(json_srv_str);
 
 
-                          
-                            var newRelease = document.getElementById("newrelease");
-                            newRelease.className = "newreleasebadge";
-                            newRelease.onclick = toogleNewReleasePopup;
-                            newRelease.innerHTML = 'New';
-                            newRelease.appendChild(newReleasePopup);
-
-                            function toogleNewReleasePopup() {
-                                var popup = document.getElementById("newReleasePopup");
-                                popup.classList.toggle("show");
-                            }
-                            
-                        }
-                    }
-                } catch (error) {
-                    console.log('error to read version from gitHub project...');
-                }
-                
-            });
-
-
-            // Create a WebSocket instance
-            // and connect to the server
-            var socket;
-            var wsUri;
-            var wsUriClosing;
-            var wsProjectId;
-            var wsProjectName;
-
-            initProjectNameAndId()
-
-            // left bar navigation for `WS projects`
-
-            var arrProjects = [];
-            var json_projects_str = '[]';
-            if (localStorage.getItem("wsmsprojects") !== null ){
-                if (localStorage.getItem("wsmsprojects") !== '') {
-                    json_projects_str = localStorage.getItem("wsmsprojects");
-                }
-            }
-            var arrProjectsraw = JSON.parse(json_projects_str);
-
-            for (let index = 0; index < arrProjectsraw.length; index++) {
-                const element = arrProjectsraw[index];
+            for (let index = 0; index < arrnavraw.length; index++) {
+                const element = arrnavraw[index];
                 if (element !== null) {
-                    arrProjects.push(element);
+                    arrNav.push(element);
+                }
+            }
+        }
+
+        function getArrWSserversBy(_wsProjectId) {
+            _arrNav = [];
+
+            var json_srv_str = '[]';
+            if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
+                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== '') {
+                    json_srv_str = localStorage.getItem(`${_wsProjectId}wsmsservers`);
                 }
             }
 
-            // left bar navigation for `History WS servers`
-            var arrNav;
+            var arrnavraw = JSON.parse(json_srv_str);
 
-            function setArrWSservers() {
-                arrNav = [];
-                var json_srv_str = '[]';
-                if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== null ){
-                    if (localStorage.getItem(`${wsProjectId}wsmsservers`) !== '') {
-                        json_srv_str = localStorage.getItem(`${wsProjectId}wsmsservers`);
-                    }
+            for (let index = 0; index < arrnavraw.length; index++) {
+                const element = arrnavraw[index];
+                if (element !== null) {
+                    _arrNav.push(element);
                 }
+            }
+            return _arrNav;
+        }
 
-                var arrnavraw = JSON.parse(json_srv_str);
+        // history messages navigation
+        var arr;
 
+        function setArrHistory() {
+            arr = [];
 
-                for (let index = 0; index < arrnavraw.length; index++) {
-                    const element = arrnavraw[index];
-                    if (element !== null) {
-                        arrNav.push(element);
-                    }
+            var json_str = '[]';
+            if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== null) {
+                if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== '') {
+                    json_str = localStorage.getItem(`${wsProjectId}wsmshistory`);
                 }
             }
 
-            function getArrWSserversBy(_wsProjectId) {
-                _arrNav = [];
-
-                var json_srv_str = '[]';
-                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null ){
-                    if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== '') {
-                        json_srv_str = localStorage.getItem(`${_wsProjectId}wsmsservers`);
-                    }
-                }
-
-                var arrnavraw = JSON.parse(json_srv_str);
-
-                for (let index = 0; index < arrnavraw.length; index++) {
-                    const element = arrnavraw[index];
-                    if (element !== null) {
-                        _arrNav.push(element);
-                    }
-                }
-                return _arrNav;
-            }
-
-            // history messages navigation
-            var arr;
-
-            function setArrHistory() {
-                arr = [];
-
-                var json_str = '[]';
-                if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== null ){
-                    if (localStorage.getItem(`${wsProjectId}wsmshistory`) !== '') {
-                        json_str = localStorage.getItem(`${wsProjectId}wsmshistory`);
-                    }
-                }
-
-                var arrraw = JSON.parse(json_str);
+            var arrraw = JSON.parse(json_str);
 
 
-                for (let index = 0; index < arrraw.length; index++) {
-                    const element = arrraw[index];
-                    if (element !== null) {
-                        arr.push(element);
-                    }
+            for (let index = 0; index < arrraw.length; index++) {
+                const element = arrraw[index];
+                if (element !== null) {
+                    arr.push(element);
                 }
             }
+        }
 
-            function showHistoryWsServers() {
-                var _wsproject = '';
-                var _wsProjectId = convertProjectNameToId(_wsproject);
-                var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
-                reloaNavBy(_wsproject, _arrNav);
+        function showHistoryWsServers() {
+            var _wsproject = '';
+            var _wsProjectId = convertProjectNameToId(_wsproject);
+            var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
+            reloaNavBy(_wsproject, _arrNav);
+        }
+
+        function setProjectId() {
+
+            wsProjectName = (document.getElementById("nameProject").value ?? '').trim();
+            var _wsProjectId = `${wsProjectName.replace(/[^A-Za-z0-9]/g, '')}`;
+            wsProjectId = (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
+            localStorage.setItem("wsmsprojectactive", wsProjectName);
+            console.log(wsProjectId);
+
+        }
+
+        function convertProjectNameToId(wsprojectname) {
+            var _wsProjectId = `${wsprojectname.replace(/[^A-Za-z0-9]/g, '')}`;
+            return (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
+        }
+
+        function initProjectNameAndId() {
+            wsProjectName = '';
+            if (localStorage.getItem("wsmsprojectactive") !== null) {
+                wsProjectName = localStorage.getItem("wsmsprojectactive");
             }
 
-            function setProjectId() {
+            document.getElementById('nameProject').value = wsProjectName;
+            setProjectId();
+        }
 
-                wsProjectName = (document.getElementById("nameProject").value ?? '').trim();
-                var _wsProjectId = `${wsProjectName.replace(/[^A-Za-z0-9]/g, '')}`;
-                wsProjectId = (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
-                localStorage.setItem("wsmsprojectactive", wsProjectName);
-                console.log(wsProjectId);
+        function initInputOfWeServer() {
 
+            wsUri = 'wss://echo.websocket.org';
+
+            if (localStorage.getItem("wsmsserveractive") !== null) {
+                wsUri = localStorage.getItem("wsmsserveractive");
             }
 
-            function convertProjectNameToId(wsprojectname) {
-                var _wsProjectId = `${wsprojectname.replace(/[^A-Za-z0-9]/g, '')}`;
-                return (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
-            }
+            document.getElementById('nameServer').value = wsUri;
+        }
 
-            function initProjectNameAndId() {
-                wsProjectName = '';
-                if (localStorage.getItem("wsmsprojectactive") !== null ){
-                        wsProjectName = localStorage.getItem("wsmsprojectactive");
+        function closeDropDownLists(exceptmenuwithid) {
+            // close other elements with class "dropdownmenu"
+            var dropdownmenues = document.getElementsByClassName("dropdownmenu");
+            for (let index = 0; index < dropdownmenues.length; index++) {
+                const element_menu = dropdownmenues[index];
+                if (exceptmenuwithid !== element_menu) {
+                    element_menu.style.display = "none";
                 }
 
-                document.getElementById('nameProject').value = wsProjectName;
-                setProjectId();
             }
+        }
 
-            function initInputOfWeServer() {
+        function openMenuWSProjectsActions(e) {
 
-                wsUri = 'wss://echo.websocket.org';
+            e.preventDefault();
 
-                if (localStorage.getItem("wsmsserveractive") !== null ){
-                    wsUri = localStorage.getItem("wsmsserveractive");
-                }
+            var menu = document.getElementById("menuWSProjectsActions");
 
-                document.getElementById('nameServer').value = wsUri;
-            }
+            // close other elements with class "dropdownmenu"
+            closeDropDownLists(menu.id);
 
-            function closeDropDownLists(exceptmenuwithid) {
-                // close other elements with class "dropdownmenu"
-                var dropdownmenues = document.getElementsByClassName("dropdownmenu");
-                for (let index = 0; index < dropdownmenues.length; index++) {
-                    const element_menu = dropdownmenues[index];
-                    if ( exceptmenuwithid !== element_menu){
-                        element_menu.style.display = "none";
-                    }
-                    
+            // write title of menu
+            document.getElementById("namemenuWSProjectsActions").innerHTML = 'WS Projects';
+
+            // show 'context menu'
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+            menu.style.display = "block";
+        }
+
+        function clickMenuItemOnWSProjectsActions(et) {
+            // do operations according to context menu here:
+
+            var actionName = et.target.id;
+
+            if (actionName === 'importWSProjects') {
+                if (document.getElementById('projectimportfiles') !== null) {
+                    document.getElementById('projectimportfiles').value = null;
+                    document.getElementById('projectimportfiles').click();
                 }
             }
 
-            function openMenuWSProjectsActions(e) {
 
-                e.preventDefault();
-
-                var menu = document.getElementById("menuWSProjectsActions");
-
-                // close other elements with class "dropdownmenu"
-                closeDropDownLists(menu.id); 
-                
-                // write title of menu
-                document.getElementById("namemenuWSProjectsActions").innerHTML = 'WS Projects';
-
-                // show 'context menu'
-                menu.style.left = e.pageX + "px";
-                menu.style.top = e.pageY + "px";
-                menu.style.display = "block";
+            if (actionName === 'closeWSProjectsMenu') {
+                // do nothing, because next code close this menu
             }
 
-            function clickMenuItemOnWSProjectsActions(et) {
-                // do operations according to context menu here:
+            // hide 'context menu'
+            et.target.parentElement.style.display = "none";
+        }
 
-                var actionName = et.target.id;
+        function openMenuProjectActions(e) {
 
-                if (actionName === 'importWSProjects') {
-                    if (document.getElementById('projectimportfiles') !== null){
-                        document.getElementById('projectimportfiles').value = null;
-                        document.getElementById('projectimportfiles').click();
-                    }
-                }
+            e.preventDefault();
 
+            var menu = document.getElementById("menuProjectActions");
 
-                if (actionName === 'closeWSProjectsMenu') {
-                    // do nothing, because next code close this menu
-                }
+            // close other elements with class "dropdownmenu"
+            closeDropDownLists(menu.id);
 
-                // hide 'context menu'
-                et.target.parentElement.style.display = "none";
+            // add title in itmes of menu according to target (target here is souce of event)
+            var _wsprojectname = e.target.innerHTML;
+            document.getElementById("exportProject").title = _wsprojectname ?? '';
+            document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
+
+            // write title of menu
+            document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;
+
+            // show 'context menu'
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+            menu.style.display = "block";
+        }
+
+        function clickMenuItemOnProjectActions(et) {
+            // do operations according to context menu here:
+            var _wsprojectname = et.target.title;
+            var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
+            var actionName = et.target.id;
+
+            if (actionName === 'exportProject') {
+                // here we create dynamically file and save it
+                var link = document.createElement("a");
+                var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
+                var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
+                var content = `projectname:${_wsprojectname}\n`
+                    + `projectid:${_wsprojectid}\n`
+                    + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
+                    + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
+                const file = new Blob([content], { type: 'text/plain' });
+                link.href = URL.createObjectURL(file);
+                link.download = `${_wsprojectid}.wsclient`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
 
-            function openMenuProjectActions(e) {
 
-                e.preventDefault();
-
-                var menu = document.getElementById("menuProjectActions");
-
-                // close other elements with class "dropdownmenu"
-                closeDropDownLists(menu.id);  
-
-                // add title in itmes of menu according to target (target here is souce of event)
-                var _wsprojectname = e.target.innerHTML;
-                document.getElementById("exportProject").title = _wsprojectname ?? '';
-                document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
-
-                // write title of menu
-                document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;                  
-
-                // show 'context menu'
-                menu.style.left = e.pageX + "px";
-                menu.style.top = e.pageY + "px";
-                menu.style.display = "block";
+            if (actionName === 'closeProjectMenu') {
+                // do nothing, because next code close this menu
             }
 
-            function clickMenuItemOnProjectActions(et) {
-                // do operations according to context menu here:
-                var _wsprojectname = et.target.title;
-                var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
-                var actionName = et.target.id;
+            // hide 'context menu'
+            et.target.parentElement.style.display = "none";
+        }
 
-                if (actionName === 'exportProject') {
-                    // here we create dynamically file and save it
-                    var link = document.createElement("a");
-                    var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
-                    var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
-                    var content = `projectname:${_wsprojectname}\n`
-                        + `projectid:${_wsprojectid}\n`
-                        + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
-                        + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
-                    const file = new Blob([content], { type: 'text/plain' });
-                    link.href = URL.createObjectURL(file);
-                    link.download = `${_wsprojectid}.wsclient`;
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                }
+        function openMenuHistoryActions(e) {
 
+            e.preventDefault();
 
-                if (actionName === 'closeProjectMenu') {
-                    // do nothing, because next code close this menu
-                }
+            var menu = document.getElementById("menuHistoryActions");
 
-                // hide 'context menu'
-                et.target.parentElement.style.display = "none";
+            // close other elements with class "dropdownmenu"
+            closeDropDownLists(menu.id);
+
+            // write title of menu
+            document.getElementById("namemenuHistoryActions").innerHTML = 'History WS servers';
+
+            // show 'context menu'
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+            menu.style.display = "block";
+        }
+
+        function clickMenuItemOnHistoryActions(et) {
+            // do operations according to context menu here:
+            var _wsprojectname = '';
+            var _wsprojectid = '';
+            var actionName = et.target.id;
+
+            if (actionName === 'exportHistory') {
+                // here we create dynamically file and save it
+                var link = document.createElement("a");
+                var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
+                var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
+                var content = `projectname:${_wsprojectname}\n`
+                    + `projectid:${_wsprojectid}\n`
+                    + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
+                    + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
+                const file = new Blob([content], { type: 'text/plain' });
+                link.href = URL.createObjectURL(file);
+                link.download = `wshistory_.wsclient`;
+                link.click();
+                URL.revokeObjectURL(link.href);
             }
 
-            function openMenuHistoryActions(e) {
 
-                e.preventDefault();
-
-                var menu = document.getElementById("menuHistoryActions");
-
-                // close other elements with class "dropdownmenu"
-                closeDropDownLists(menu.id); 
-                
-                // write title of menu
-                document.getElementById("namemenuHistoryActions").innerHTML = 'History WS servers';                   
-
-                // show 'context menu'
-                menu.style.left = e.pageX + "px";
-                menu.style.top = e.pageY + "px";
-                menu.style.display = "block";
+            if (actionName === 'closeHistoryMenu') {
+                // do nothing, because next code close this menu
             }
 
-            function clickMenuItemOnHistoryActions(et) {
-                // do operations according to context menu here:
-                var _wsprojectname = '';
-                var _wsprojectid = '';
-                var actionName = et.target.id;
+            // hide 'context menu'
+            et.target.parentElement.style.display = "none";
+        }
 
-                if (actionName === 'exportHistory') {
-                    // here we create dynamically file and save it
-                    var link = document.createElement("a");
-                    var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
-                    var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
-                    var content = `projectname:${_wsprojectname}\n`
-                        + `projectid:${_wsprojectid}\n`
-                        + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
-                        + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
-                    const file = new Blob([content], { type: 'text/plain' });
-                    link.href = URL.createObjectURL(file);
-                    link.download = `wshistory_.wsclient`;
-                    link.click();
-                    URL.revokeObjectURL(link.href);
-                }
+        async function readImportedProjectText(input) {
+            try {
+                var file = input.files[0];
+                //var filename = file.name;
+                var txt = await file.text();
 
+                var lines = txt.split('\n');
+                var _projectname = '';
+                for (var index = 0; index < lines.length; index++) {
+                    var line = lines[index];
 
-                if (actionName === 'closeHistoryMenu') {
-                    // do nothing, because next code close this menu
-                }
+                    if (line.includes('projectname:')) {
 
-                // hide 'context menu'
-                et.target.parentElement.style.display = "none";
-            }
-
-            async function readImportedProjectText(input) {
-                try {
-                    var file = input.files[0];
-                    //var filename = file.name;
-                    var txt = await file.text();
-
-                    var lines = txt.split('\n');
-                    var _projectname = '';
-                    for (var index = 0; index < lines.length; index++) {
-                        var line = lines[index];
-
-                        if (line.includes('projectname:')) {
-                           
-                            _projectname = (line.split('projectname:')[1])??'';
-                            if (_projectname !== '') {
-                                if (arrProjects.indexOf(_projectname) < 0) {
-                                    arrProjects.push(_projectname);
-                                    var json_prj_str = JSON.stringify(arrProjects);
-                                    localStorage.setItem("wsmsprojects", json_prj_str);
-                                    reloadProjects();
-                                }
-                            }
-
-                        } else
-                            if (line.includes(':[')) {
-                                
-                                var _key = line.split(':[')[0];
-                                var _values = '[' + line.split(':[')[1];
-                                if (localStorage.getItem(_key) === null) {
-                                    // import the whole list of wsmsservers because it is a new _key
-                                    localStorage.setItem(_key, _values);
-                                    if (_key.includes('wsmsservers')) {
-                                        // reload Navigation actoss servers in left side menu
-                                        var _arr_new = JSON.parse(_values);
-                                        reloaNavBy(_projectname, _arr_new);
-                                    } 
-                                  
-                                } else {
-                                    
-                                    // enrich existing _key by values from list of wsmsservers
-                                    var _arr_new = JSON.parse(_values);
-                                    var _existing_str = '[]';
-                                    if ( localStorage.getItem(`${_key}`) !== null ) {
-                                        if ( localStorage.getItem(`${_key}`) !== '' ) {
-                                            _existing_str = localStorage.getItem(`${_key}`);
-                                        }
-                                    }
-                
-                                    var _arr_existing = JSON.parse(_existing_str);
-                                    _arr_new.forEach(element => {
-                                        if (_arr_existing.indexOf(element) < 0) {
-                                            _arr_existing.push(element);
-                                        }
-                                    });
-
-                                    var json_merged_str = JSON.stringify(_arr_existing);
-                                    localStorage.setItem(_key, json_merged_str);
-
-                                    if (_key.includes('wsmsservers')) {
-                                        // reload Navigation actoss servers in left side menu
-                                        reloaNavBy(_projectname, _arr_existing);
-                                    }
-                                }
-                            }
-                    }
-
-                } catch (e) {
-                    console.log(e.message);
-                }
-            }
-
-            function addProjectElement(wsproject) {
-                var wsprojectname = document.createElement("p");
-                wsprojectname.style.wordWrap = "break-word";
-                wsprojectname.className = "wsprojectname"
-                wsprojectname.onclick = chooseWsProject;
-                wsprojectname.title = "Choose this WS server or press right button to open context menu and export this project";
-                wsprojectname.innerHTML = `${wsproject}`;
-                wsprojectname.oncontextmenu = openMenuProjectActions;
-
-                var wsprojectclose = document.createElement("p");
-                wsprojectclose.title = "remove from history";
-                wsprojectclose.onclick = removeWsProject;
-                wsprojectclose.className = "wsprojectclose";
-                wsprojectclose.innerHTML = "&times;";
-
-                var wsprojectrow = document.createElement("div");
-                wsprojectrow.className = "wsprojectrow";
-                wsprojectrow.appendChild(wsprojectname);
-                wsprojectrow.appendChild(wsprojectclose);
-
-                var wsprojectsummary = document.createElement("summary");
-                wsprojectsummary.className = "wssummary";
-                wsprojectsummary.appendChild(wsprojectrow);
-
-                var wsprojectserverslist = document.createElement("div");
-                wsprojectserverslist.setAttribute("id", `${convertProjectNameToId(wsproject)}listWsServersHistory`);
-
-
-                var wsprojectdetails = document.createElement("details");
-                wsprojectdetails.ontoggle = showProjectWsServers;
-                wsprojectdetails.className = "wsproject";
-                wsprojectdetails.appendChild(wsprojectsummary);
-                wsprojectdetails.appendChild(wsprojectserverslist);
-
-                const barSideProjectnav = document
-                    .getElementById('listWsProjects');
-                barSideProjectnav.appendChild(wsprojectdetails);
-
-                function showProjectWsServers() {
-                    var _wsProjectId = convertProjectNameToId(wsproject);
-                    var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
-                    reloaNavBy(wsproject, _arrNav);
-
-                }
-
-                function chooseWsProject() {
-                    var anotherproject = false;
-                    // if user choosed another server then close existing server
-                    if (wsproject !== wsProjectName) {
-                        //closeConnect();
-                        anotherproject = true;
-                    }
-                    wsProjectName = document.getElementById('nameProject').value = wsproject;
-
-                    if (anotherproject) {
-
-                        //reConnect();
-
-                        setProjectId();
-                        setArrHistory();
-                        reloadHistory();
-                        setArrWSservers();
-                        reloaNav();
-
-                    } else {
-                        setArrHistory();
-                        reloadHistory();
-                    }
-                    // close side bar
-                    closeNav();
-                }
-
-                function removeWsProject() {
-                    var result = confirm(`Want to delete WS project: "${wsproject}" ? Message history and WS servers of project will be deleted as well.`);
-                    if (result) {
-                        var _wsProjectId = convertProjectNameToId(wsproject) ?? '';
-                        var deleteactivews = false;
-                        if (wsproject === wsProjectName) {
-                            console.log('delete active');
-                            deleteactivews = true;
-                            //closeConnect();
-                        }
-                        if (arrProjects.indexOf(wsproject) >= 0) {
-                            var indextoremove = arrProjects.indexOf(wsproject);
-                            var newarrprojects = [];
-                            for (let index = 0; index < arrProjects.length; index++) {
-
-                                if (index !== indextoremove) {
-                                    if (arrProjects[index] !== null) {
-                                        newarrprojects.push(arrProjects[index]);
-                                    }
-                                }
-                            }
-                            arrProjects = newarrprojects;
-
-                            var json_projects_str = JSON.stringify(arrProjects);
-                            localStorage.setItem("wsmsprojects", json_projects_str);
-
-                            if (_wsProjectId !== '') {
-                                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
-                                    localStorage.removeItem(`${_wsProjectId}wsmsservers`);
-                                }
-                                if (localStorage.getItem(`${_wsProjectId}wsmshistory`) !== null) {
-                                    localStorage.removeItem(`${_wsProjectId}wsmshistory`);
-                                }
-                            }
-
-                            if (this.parentElement.parentElement !== null){
-                                if (this.parentElement.parentElement.parentElement != null){
-                                    this.parentElement.parentElement.parentElement.remove();
-                                }
-                            }
-
-                            
-
-                            if (deleteactivews) {
-
-                                document.getElementById("nameProject").value = '';
-                                wsProjectName = '';
-                                setProjectId();
-                                setArrHistory();
-                                reloadHistory();
-                                setArrWSservers();
-                                reloaNav();
+                        _projectname = (line.split('projectname:')[1]) ?? '';
+                        if (_projectname !== '') {
+                            if (arrProjects.indexOf(_projectname) < 0) {
+                                arrProjects.push(_projectname);
+                                var json_prj_str = JSON.stringify(arrProjects);
+                                localStorage.setItem("wsmsprojects", json_prj_str);
                                 reloadProjects();
                             }
-
-                            // close side bar
-                            closeNav();
                         }
+
+                    } else
+                        if (line.includes(':[')) {
+
+                            var _key = line.split(':[')[0];
+                            var _values = '[' + line.split(':[')[1];
+                            if (localStorage.getItem(_key) === null) {
+                                // import the whole list of wsmsservers because it is a new _key
+                                localStorage.setItem(_key, _values);
+                                if (_key.includes('wsmsservers')) {
+                                    // reload Navigation actoss servers in left side menu
+                                    var _arr_new = JSON.parse(_values);
+                                    reloaNavBy(_projectname, _arr_new);
+                                }
+
+                            } else {
+
+                                // enrich existing _key by values from list of wsmsservers
+                                var _arr_new = JSON.parse(_values);
+                                var _existing_str = '[]';
+                                if (localStorage.getItem(`${_key}`) !== null) {
+                                    if (localStorage.getItem(`${_key}`) !== '') {
+                                        _existing_str = localStorage.getItem(`${_key}`);
+                                    }
+                                }
+
+                                var _arr_existing = JSON.parse(_existing_str);
+                                _arr_new.forEach(element => {
+                                    if (_arr_existing.indexOf(element) < 0) {
+                                        _arr_existing.push(element);
+                                    }
+                                });
+
+                                var json_merged_str = JSON.stringify(_arr_existing);
+                                localStorage.setItem(_key, json_merged_str);
+
+                                if (_key.includes('wsmsservers')) {
+                                    // reload Navigation actoss servers in left side menu
+                                    reloaNavBy(_projectname, _arr_existing);
+                                }
+                            }
+                        }
+                }
+
+            } catch (e) {
+                console.log(e.message);
+            }
+        }
+
+        function addProjectElement(wsproject) {
+            var wsprojectname = document.createElement("p");
+            wsprojectname.style.wordWrap = "break-word";
+            wsprojectname.className = "wsprojectname"
+            wsprojectname.onclick = chooseWsProject;
+            wsprojectname.title = "Choose this WS server or press right button to open context menu and export this project";
+            wsprojectname.innerHTML = `${wsproject}`;
+            wsprojectname.oncontextmenu = openMenuProjectActions;
+
+            var wsprojectclose = document.createElement("p");
+            wsprojectclose.title = "remove from history";
+            wsprojectclose.onclick = removeWsProject;
+            wsprojectclose.className = "wsprojectclose";
+            wsprojectclose.innerHTML = "&times;";
+
+            var wsprojectrow = document.createElement("div");
+            wsprojectrow.className = "wsprojectrow";
+            wsprojectrow.appendChild(wsprojectname);
+            wsprojectrow.appendChild(wsprojectclose);
+
+            var wsprojectsummary = document.createElement("summary");
+            wsprojectsummary.className = "wssummary";
+            wsprojectsummary.appendChild(wsprojectrow);
+
+            var wsprojectserverslist = document.createElement("div");
+            wsprojectserverslist.setAttribute("id", `${convertProjectNameToId(wsproject)}listWsServersHistory`);
+
+
+            var wsprojectdetails = document.createElement("details");
+            wsprojectdetails.ontoggle = showProjectWsServers;
+            wsprojectdetails.className = "wsproject";
+            wsprojectdetails.appendChild(wsprojectsummary);
+            wsprojectdetails.appendChild(wsprojectserverslist);
+
+            const barSideProjectnav = document
+                .getElementById('listWsProjects');
+            barSideProjectnav.appendChild(wsprojectdetails);
+
+            function showProjectWsServers() {
+                var _wsProjectId = convertProjectNameToId(wsproject);
+                var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
+                reloaNavBy(wsproject, _arrNav);
+
+            }
+
+            function chooseWsProject() {
+                var anotherproject = false;
+                // if user choosed another server then close existing server
+                if (wsproject !== wsProjectName) {
+                    anotherproject = true;
+                }
+                wsProjectName = document.getElementById('nameProject').value = wsproject;
+
+                if (anotherproject) {
+
+
+                    setProjectId();
+                    setArrHistory();
+                    reloadHistory();
+                    setArrWSservers();
+                    reloaNav();
+
+                } else {
+                    setArrHistory();
+                    reloadHistory();
+                }
+                // close side bar
+                closeNav();
+            }
+
+            function removeWsProject() {
+                var result = confirm(`Want to delete WS project: "${wsproject}" ? Message history and WS servers of project will be deleted as well.`);
+                if (result) {
+                    var _wsProjectId = convertProjectNameToId(wsproject) ?? '';
+                    var deleteactivews = false;
+                    if (wsproject === wsProjectName) {
+                        console.log('delete active');
+                        deleteactivews = true;
+                        //closeConnect();
+                    }
+                    if (arrProjects.indexOf(wsproject) >= 0) {
+                        var indextoremove = arrProjects.indexOf(wsproject);
+                        var newarrprojects = [];
+                        for (let index = 0; index < arrProjects.length; index++) {
+
+                            if (index !== indextoremove) {
+                                if (arrProjects[index] !== null) {
+                                    newarrprojects.push(arrProjects[index]);
+                                }
+                            }
+                        }
+                        arrProjects = newarrprojects;
+
+                        var json_projects_str = JSON.stringify(arrProjects);
+                        localStorage.setItem("wsmsprojects", json_projects_str);
+
+                        if (_wsProjectId !== '') {
+                            if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
+                                localStorage.removeItem(`${_wsProjectId}wsmsservers`);
+                            }
+                            if (localStorage.getItem(`${_wsProjectId}wsmshistory`) !== null) {
+                                localStorage.removeItem(`${_wsProjectId}wsmshistory`);
+                            }
+                        }
+
+                        if (this.parentElement.parentElement !== null) {
+                            if (this.parentElement.parentElement.parentElement != null) {
+                                this.parentElement.parentElement.parentElement.remove();
+                            }
+                        }
+
+
+
+                        if (deleteactivews) {
+
+                            document.getElementById("nameProject").value = '';
+                            wsProjectName = '';
+                            setProjectId();
+                            setArrHistory();
+                            reloadHistory();
+                            setArrWSservers();
+                            reloaNav();
+                            reloadProjects();
+                        }
+
+                        // close side bar
+                        closeNav();
                     }
                 }
             }
+        }
 
 
-            function addNavElement(wsserver, wrprojectname) {
+        function addNavElement(wsserver, wrprojectname) {
 
-                var wsproject_id = convertProjectNameToId(wrprojectname) ?? '';
-                var wshistname = document.createElement("p");
-                wshistname.style.wordWrap = "break-word";
-                wshistname.className = "wshistname"
-                // wshistname.href = `javascript:void(0)`;
-                wshistname.onclick = chooseWsServer;
-                wshistname.title = "click to choose";
-                wshistname.setAttribute("prjname", wrprojectname);
-                wshistname.innerHTML = `${wsserver}`;
+            var wsproject_id = convertProjectNameToId(wrprojectname) ?? '';
+            var wshistname = document.createElement("p");
+            wshistname.style.wordWrap = "break-word";
+            wshistname.className = "wshistname"
+            // wshistname.href = `javascript:void(0)`;
+            wshistname.onclick = chooseWsServer;
+            wshistname.title = "click to choose";
+            wshistname.setAttribute("prjname", wrprojectname);
+            wshistname.innerHTML = `${wsserver}`;
 
-                var wshistclose = document.createElement("p");
-                wshistclose.title = "remove from history";
-                wshistclose.onclick = removeWsServer;
-                wshistclose.className = "wshistclose";
-                wshistclose.setAttribute("prjname", wrprojectname);
-                wshistclose.innerHTML = "&times;";
+            var wshistclose = document.createElement("p");
+            wshistclose.title = "remove from history";
+            wshistclose.onclick = removeWsServer;
+            wshistclose.className = "wshistclose";
+            wshistclose.setAttribute("prjname", wrprojectname);
+            wshistclose.innerHTML = "&times;";
 
-                var wshistrow = document.createElement("div");
-                wshistrow.className = "wshistrow";
-                wshistrow.appendChild(wshistname);
-                wshistrow.appendChild(wshistclose);
+            var wshistrow = document.createElement("div");
+            wshistrow.className = "wshistrow";
+            wshistrow.appendChild(wshistname);
+            wshistrow.appendChild(wshistclose);
 
-                const barSidenav = document
-                    .getElementById(`${wsproject_id}listWsServersHistory`);
-                barSidenav.appendChild(wshistrow);
+            const barSidenav = document
+                .getElementById(`${wsproject_id}listWsServersHistory`);
+            barSidenav.appendChild(wshistrow);
 
-                function chooseWsServer() {
+            function chooseWsServer() {
+                var _wsProjectName = this.getAttribute("prjname") ?? '';
+                var anotherProject = false;
+                if (wsProjectName !== _wsProjectName) {
+                    anotherProject = true;
+                }
+
+                var anotherserver = false;
+                // if user choosed another server then close existing server
+                if (wsserver !== wsUri) {
+                    closeConnect();
+                    anotherserver = true;
+                }
+                wsUri = document.getElementById('nameServer').value = wsserver;
+
+
+                if (anotherserver) {
+
+                    reConnect();
+                    localStorage.setItem("wsmsserveractive", wsUri);
+                }
+
+                if (anotherProject) {
+                    wsProjectName = document.getElementById('nameProject').value = _wsProjectName;
+                    setProjectId();
+                    setArrHistory();
+                    reloadHistory();
+                } else {
+                    setArrHistory();
+                    reloadHistory();
+                }
+                // close side bar
+                closeNav();
+            }
+
+            function removeWsServer() {
+                var result = confirm(`Want to delete WS server: "${wsserver}" ?`);
+                if (result) {
                     var _wsProjectName = this.getAttribute("prjname") ?? '';
                     var anotherProject = false;
                     if (wsProjectName !== _wsProjectName) {
                         anotherProject = true;
                     }
 
-                    var anotherserver = false;
-                    // if user choosed another server then close existing server
-                    if (wsserver !== wsUri) {
-                        closeConnect();
-                        anotherserver = true;
-                    }
-                    wsUri = document.getElementById('nameServer').value = wsserver;
-
-
-                    if (anotherserver) {
-
-                        reConnect();
-                        localStorage.setItem("wsmsserveractive", wsUri);
-                    }
-
                     if (anotherProject) {
-                        wsProjectName = document.getElementById('nameProject').value = _wsProjectName;
+                        var _wsProjectId = convertProjectNameToId(_wsProjectName);
+                        var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
+                        var indextoremove = _arrNav.indexOf(wsserver);
+                        var newarrnav = [];
+                        for (let index = 0; index < _arrNav.length; index++) {
+
+                            if (index !== indextoremove) {
+                                if (_arrNav[index] !== null) {
+                                    newarrnav.push(_arrNav[index]);
+                                }
+                            }
+                        }
+                        _arrNav = newarrnav;
+                        var json_nav_str = JSON.stringify(_arrNav);
+
+                        localStorage.setItem(`${_wsProjectId}wsmsservers`, json_nav_str);
+                        this.parentElement.remove();
+
+                    }
+                    else {
+                        var deleteactivews = false;
+                        if (wsserver === wsUri) {
+                            console.log('delete active');
+                            deleteactivews = true;
+                            closeConnect();
+                        }
+                        if (arrNav.indexOf(wsserver) >= 0) {
+                            var indextoremove = arrNav.indexOf(wsserver);
+                            var newarrnav = [];
+                            for (let index = 0; index < arrNav.length; index++) {
+
+                                if (index !== indextoremove) {
+                                    if (arrNav[index] !== null) {
+                                        newarrnav.push(arrNav[index]);
+                                    }
+                                }
+                            }
+                            arrNav = newarrnav;
+
+                            var json_nav_str = JSON.stringify(arrNav);
+                            localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
+
+                            if (deleteactivews) {
+                                document.getElementById("nameServer").value = '';
+                                wsUri = '';
+                                localStorage.setItem("wsmsserveractive", wsUri);
+                            }
+                            reloaNav();
+                            // close side bar
+
+                        }
+                    }
+
+
+                    closeNav();
+                }
+            }
+        }
+
+        function reloaNav() {
+            document.getElementById(`${wsProjectId}listWsServersHistory`).innerHTML = '';
+            arrNav.forEach((item) => {
+                addNavElement(`${item}`, `${wsProjectName}`);
+            })
+        }
+
+        function reloaNavBy(_wsProjectName, _arrNav) {
+            var _wsProjectId = convertProjectNameToId(_wsProjectName) ?? '';
+            if (document.getElementById(`${_wsProjectId}listWsServersHistory`) !== null) {
+                document.getElementById(`${_wsProjectId}listWsServersHistory`).innerHTML = '';
+                _arrNav.forEach((item) => {
+                    addNavElement(`${item}`, `${_wsProjectName}`);
+                })
+            }
+
+
+        }
+
+        function reloadProjects() {
+            document.getElementById('listWsProjects').innerHTML = '';
+            arrProjects.forEach((item) => {
+                addProjectElement(`${item}`);
+            })
+        }
+
+        function openNav() {
+            document.getElementById("barSideNav").style.width = "250px";
+
+        }
+
+
+
+
+        function closeNav() {
+            document.getElementById("barSideNav").style.width = "0";
+            closeDropDownLists('');
+        }
+
+        function reloadHistory() {
+            document.getElementById('history').innerHTML = '';
+            arr.forEach((item) => {
+                console.log(item);
+                writeToHistory(`${item}`, 'brown');
+            })
+        }
+
+        function reConnect() {
+
+            wsUri = document.getElementById("nameServer").value;
+            socket = new WebSocket(wsUri);
+
+            socket.onopen = function (evt) {
+                onOpen(evt)
+            };
+
+            socket.onclose = function (evt) {
+                onClose(evt)
+            };
+
+            socket.onmessage = function (evt) {
+                onMessage(evt)
+            };
+
+            socket.onerror = function (evt) {
+                onError(evt)
+            };
+        }
+
+        // Event listener for when 
+        //the WebSocket connection is opened
+        onOpen = function (event) {
+            // Write message that users is 
+            // connected to the WebSocket server
+            writeToScreen(`You are Connected to Server "${wsUri}"`, 'green');
+
+        };
+
+        // Event listener for when a message
+        //  is received from the server
+        onMessage = function (event) {
+            writeToScreen(`Response message: ${event.data}`, 'green');
+        };
+
+        // Event listener for when the 
+        // WebSocket connection is closed
+        onClose = function (event) {
+            // Log a message when disconnected
+            //  from the WebSocket server
+            //console.log('Disconnected from WebSocket server');
+            writeToScreen(`You are disconnected from Server "${wsUriClosing}". Code: ${event.code} `, 'red');
+        };
+
+        // Event listener for when the 
+        // WebSocket sending message had error
+        onError = function (event) {
+            writeToScreen(`It was error.`, 'red');
+        };
+
+        // Function to send a message
+        //  to the WebSocket server
+        function sendMessage() {
+            // Get the message input element
+            const messageInput = document
+                .getElementById('messageInput');
+            // Get the value of
+            // the message input
+            const message = messageInput.value;
+
+            if (socket.readyState === WebSocket.OPEN) {
+                // Send the message to 
+                // the WebSocket server			
+                socket.send(message);
+                // and show what we sent
+                writeToScreen(`Sent message: ${message}`, 'blue');
+
+                var nameProject = (document
+                    .getElementById('nameProject').value ?? '').trim();
+                if (nameProject !== '') {
+                    if (arrProjects.indexOf(nameProject) < 0) {
+                        arrProjects.push(nameProject);
+                        var json_prj_str = JSON.stringify(arrProjects);
+                        localStorage.setItem("wsmsprojects", json_prj_str);
+                        setProjectId();
+                        reloadProjects();
+                        setArrHistory();
+                        reloadHistory();
+                        setArrWSservers();
+                        reloaNav();
+                    }
+                } else {
+                    if (wsProjectId != '') {
                         setProjectId();
                         setArrHistory();
                         reloadHistory();
-                    } else {
-                        setArrHistory();
-                        reloadHistory();                        
-                    }
-                    // close side bar
-                    closeNav();
-                }
-
-                function removeWsServer() {
-                    var result = confirm(`Want to delete WS server: "${wsserver}" ?`);
-                    if (result) {
-                        var _wsProjectName = this.getAttribute("prjname") ?? '';
-                        var anotherProject = false;
-                        if (wsProjectName !== _wsProjectName) {
-                            anotherProject = true;
-                        }
-
-                        if (anotherProject) {
-                            var _wsProjectId = convertProjectNameToId(_wsProjectName);
-                            var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
-                            var indextoremove = _arrNav.indexOf(wsserver);
-                            var newarrnav = [];
-                            for (let index = 0; index < _arrNav.length; index++) {
-
-                                if (index !== indextoremove) {
-                                    if (_arrNav[index] !== null) {
-                                        newarrnav.push(_arrNav[index]);
-                                    }
-                                }
-                            }
-                            _arrNav = newarrnav;
-                            var json_nav_str = JSON.stringify(_arrNav);
-
-                            localStorage.setItem(`${_wsProjectId}wsmsservers`, json_nav_str);
-                            this.parentElement.remove();
-
-                        }
-                        else {
-                            var deleteactivews = false;
-                            if (wsserver === wsUri) {
-                                console.log('delete active');
-                                deleteactivews = true;
-                                closeConnect();
-                            }
-                            if (arrNav.indexOf(wsserver) >= 0) {
-                                var indextoremove = arrNav.indexOf(wsserver);
-                                var newarrnav = [];
-                                for (let index = 0; index < arrNav.length; index++) {
-
-                                    if (index !== indextoremove) {
-                                        if (arrNav[index] !== null) {
-                                            newarrnav.push(arrNav[index]);
-                                        }
-                                    }
-                                }
-                                arrNav = newarrnav;
-
-                                var json_nav_str = JSON.stringify(arrNav);
-                                localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
-
-                                if (deleteactivews) {
-                                    document.getElementById("nameServer").value = '';
-                                    wsUri = '';
-                                    localStorage.setItem("wsmsserveractive", wsUri);
-                                }
-                                reloaNav();
-                                // close side bar
-
-                            }
-                        }
-
-
-                        closeNav();
+                        setArrWSservers();
+                        reloaNav();
                     }
                 }
-            }
-
-            function reloaNav() {
-                document.getElementById(`${wsProjectId}listWsServersHistory`).innerHTML = '';
-                arrNav.forEach((item) => {
-                    addNavElement(`${item}`, `${wsProjectName}`);
-                })
-            }
-
-            function reloaNavBy(_wsProjectName, _arrNav) {
-                var _wsProjectId = convertProjectNameToId(_wsProjectName) ?? '';
-                if ( document.getElementById(`${_wsProjectId}listWsServersHistory`) !== null) {
-                    document.getElementById(`${_wsProjectId}listWsServersHistory`).innerHTML = '';
-                    _arrNav.forEach((item) => {
-                    addNavElement(`${item}`, `${_wsProjectName}`);
-                })
-                }
-                
-
-            }
-
-            function reloadProjects() {
-                document.getElementById('listWsProjects').innerHTML = '';
-                arrProjects.forEach((item) => {
-                    addProjectElement(`${item}`);
-                })
-            }
-
-            function openNav() {
-                document.getElementById("barSideNav").style.width = "250px";
-
-            }
-
-            
-
-
-            function closeNav() {
-                document.getElementById("barSideNav").style.width = "0";
-                closeDropDownLists('');
-            }
-
-            function reloadHistory() {
-                document.getElementById('history').innerHTML = '';
-                arr.forEach((item) => {
-                    console.log(item);
-                    writeToHistory(`${item}`, 'brown');
-                })
-            }
-
-            function reConnect() {
-
-                wsUri = document.getElementById("nameServer").value;
-                socket = new WebSocket(wsUri);
-
-                socket.onopen = function (evt) {
-                    onOpen(evt)
-                };
-
-                socket.onclose = function (evt) {
-                    onClose(evt)
-                };
-
-                socket.onmessage = function (evt) {
-                    onMessage(evt)
-                };
-
-                socket.onerror = function (evt) {
-                    onError(evt)
-                };
-            }
-
-            // Event listener for when 
-            //the WebSocket connection is opened
-            onOpen = function (event) {
-                // Write message that users is 
-                // connected to the WebSocket server
-                writeToScreen(`You are Connected to Server "${wsUri}"`, 'green');
-
-            };
-
-            // Event listener for when a message
-            //  is received from the server
-            onMessage = function (event) {
-                writeToScreen(`Response message: ${event.data}`, 'green');
-            };
-
-            // Event listener for when the 
-            // WebSocket connection is closed
-            onClose = function (event) {
-                // Log a message when disconnected
-                //  from the WebSocket server
-                //console.log('Disconnected from WebSocket server');
-                writeToScreen(`You are disconnected from Server "${wsUriClosing}". Code: ${event.code} `, 'red');
-            };
-
-            // Event listener for when the 
-            // WebSocket sending message had error
-            onError = function (event) {
-                writeToScreen(`It was error.`, 'red');
-            };
-
-            // Function to send a message
-            //  to the WebSocket server
-            function sendMessage() {
-                // Get the message input element
-                const messageInput = document
-                    .getElementById('messageInput');
-                // Get the value of
-                // the message input
-                const message = messageInput.value;
-
-                if (socket.readyState === WebSocket.OPEN) {
-                    // Send the message to 
-                    // the WebSocket server			
-                    socket.send(message);
-                    // and show what we sent
-                    writeToScreen(`Sent message: ${message}`, 'blue');
-
-                    var nameProject = (document
-                        .getElementById('nameProject').value ?? '').trim();
-                    if (nameProject !== '') {
-                        if (arrProjects.indexOf(nameProject) < 0) {
-                            arrProjects.push(nameProject);
-                            var json_prj_str = JSON.stringify(arrProjects);
-                            localStorage.setItem("wsmsprojects", json_prj_str);
-                            setProjectId();
-                            reloadProjects();
-                            setArrHistory();
-                            reloadHistory();
-                            setArrWSservers();
-                            reloaNav();
-                        }
-                    } else {
-                        if (wsProjectId != '') {
-                            setProjectId();
-                            setArrHistory();
-                            reloadHistory();
-                            setArrWSservers();
-                            reloaNav();
-                        }
-                    }
 
 
 
-                    if (arr.indexOf(message) < 0) {
-                        arr.push(message);
-                        var json_str = JSON.stringify(arr);
-                        localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
-                        writeToHistory(`${message}`, 'brown');
-                    }
-
-                    if (arrNav.indexOf(wsUri) < 0) {
-                        arrNav.push(wsUri);
-                        var json_nav_str = JSON.stringify(arrNav);
-                        localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
-                        reloaNav()
-                    }
-
-                    localStorage.setItem("wsmsserveractive", wsUri);
-
-                }
-                // Clear the message input
-                messageInput.value = '';
-            }
-
-            function changeProject() {
-                setProjectId();
-                setArrHistory();
-                reloadHistory();
-                setArrWSservers();
-                reloaNav();
-            }
-
-            function closeConnect() {
-                if (socket.readyState === WebSocket.OPEN) {
-                    wsUriClosing = wsUri;
-                    socket.close();
-                }
-            }
-
-            function writeToScreen(message, color = 'black') {
-                var pre = document.createElement("p");
-                pre.style.wordWrap = "break-word";
-                pre.style.color = `${color}`;
-                pre.innerHTML = message;
-                const outputDiv = document
-                    .getElementById('output');
-                outputDiv.appendChild(pre);
-
-            }
-
-            function writeToHistory(message, color = 'black') {
-
-                var histText = document.createElement("p");
-                histText.style.wordWrap = "break-word";
-                histText.style.color = `${color}`;
-                histText.innerHTML = message;
-                histText.className = "histText";
-                histText.onclick = copyToMessage;
-
-                var delbtn = document.createElement("p");
-                delbtn.className = "histBtn";
-                delbtn.title = "Delete message from history";
-                delbtn.onclick = delMessageFromHistory;
-                delbtn.innerHTML = "&times;";
-
-                var histRow = document.createElement("div");
-                histRow.className = "histRow";
-                histRow.appendChild(histText);
-                histRow.appendChild(delbtn);
-
-                const historyDiv = document
-                    .getElementById('history');
-                historyDiv.appendChild(histRow);
-
-                function copyToMessage() {
-                    var messageInput = document
-                        .getElementById('messageInput');
-                    messageInput.value = message;
+                if (arr.indexOf(message) < 0) {
+                    arr.push(message);
+                    var json_str = JSON.stringify(arr);
+                    localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
+                    writeToHistory(`${message}`, 'brown');
                 }
 
-                function delMessageFromHistory() {
-
-                    var result = confirm(`Want to delete from history: "${message}" ?`);
-                    if (result) {
-                        if (arr.indexOf(message) >= 0) {
-                            var indextoremove = arr.indexOf(message);
-                            var newarr = [];
-                            for (let index = 0; index < arr.length; index++) {
-                                var element = arr[index];
-                                if (indextoremove !== index) {
-                                    newarr.push(element);
-                                }
-                            }
-                            arr = newarr;
-                            var json_str = JSON.stringify(arr);
-                            localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
-                            reloadHistory()
-
-                        }
-                    }
+                if (arrNav.indexOf(wsUri) < 0) {
+                    arrNav.push(wsUri);
+                    var json_nav_str = JSON.stringify(arrNav);
+                    localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
+                    reloaNav()
                 }
+
+                localStorage.setItem("wsmsserveractive", wsUri);
+
             }
+            // Clear the message input
+            messageInput.value = '';
+        }
 
-
-
-            function clearScreen() {
-
-                document.getElementById("output").innerHTML = "";
-            }
-
-
-            initInputOfWeServer();
-            reConnect();
+        function changeProject() {
+            setProjectId();
             setArrHistory();
             reloadHistory();
-            reloadProjects();
             setArrWSservers();
             reloaNav();
+        }
 
-        </script>
+        function closeConnect() {
+            if (socket.readyState === WebSocket.OPEN) {
+                wsUriClosing = wsUri;
+                socket.close();
+            }
+        }
+
+        function writeToScreen(message, color = 'black') {
+            var pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.style.color = `${color}`;
+            pre.innerHTML = message;
+            const outputDiv = document
+                .getElementById('output');
+            outputDiv.appendChild(pre);
+
+        }
+
+        function writeToHistory(message, color = 'black') {
+
+            var histText = document.createElement("p");
+            histText.style.wordWrap = "break-word";
+            histText.style.color = `${color}`;
+            histText.innerHTML = message;
+            histText.className = "histText";
+            histText.onclick = copyToMessage;
+
+            var delbtn = document.createElement("p");
+            delbtn.className = "histBtn";
+            delbtn.title = "Delete message from history";
+            delbtn.onclick = delMessageFromHistory;
+            delbtn.innerHTML = "&times;";
+
+            var histRow = document.createElement("div");
+            histRow.className = "histRow";
+            histRow.appendChild(histText);
+            histRow.appendChild(delbtn);
+
+            const historyDiv = document
+                .getElementById('history');
+            historyDiv.appendChild(histRow);
+
+            function copyToMessage() {
+                var messageInput = document
+                    .getElementById('messageInput');
+                messageInput.value = message;
+            }
+
+            function delMessageFromHistory() {
+
+                var result = confirm(`Want to delete from history: "${message}" ?`);
+                if (result) {
+                    if (arr.indexOf(message) >= 0) {
+                        var indextoremove = arr.indexOf(message);
+                        var newarr = [];
+                        for (let index = 0; index < arr.length; index++) {
+                            var element = arr[index];
+                            if (indextoremove !== index) {
+                                newarr.push(element);
+                            }
+                        }
+                        arr = newarr;
+                        var json_str = JSON.stringify(arr);
+                        localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
+                        reloadHistory()
+
+                    }
+                }
+            }
+        }
+
+
+
+        function clearScreen() {
+
+            document.getElementById("output").innerHTML = "";
+        }
+
+
+        initInputOfWeServer();
+        reConnect();
+        setArrHistory();
+        reloadHistory();
+        reloadProjects();
+        setArrWSservers();
+        reloaNav();
+
+    </script>
 
 </body>
 
