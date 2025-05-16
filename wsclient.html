@@ -28,6 +28,14 @@
 
         }
 
+        .sidenav details summary span {
+            color: #cac707;
+        }  
+
+        .sidenav details summary span:hover {
+            color: #ddf316;
+        }        
+
         .sidenav {
             height: 100%;
             width: 0;
@@ -341,7 +349,7 @@
             background: #2c2c2c;
         }
 
-        p.wsprojectclose {
+        p.wsprojectmenu {
             cursor: pointer;
 
             width: auto;
@@ -352,7 +360,7 @@
 
         }
 
-        p.wsprojectclose:hover {
+        p.wsprojectmenu:hover {
             background: #bbb;
         }
 
@@ -471,7 +479,7 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <details style="padding-top: 24px;">
             <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS
-                projects:</summary>
+                projects&nbsp;<span onclick="openMenuWSProjectsActions(event)">&#9783;</span></summary>
             <p>In this panel you can choose previously created WS Project where you combine relevant ws-servers and
                 relevant messages by the same way how for History but isolated by name of project. Projects have ability
                 to be exported and imported by pressing on right button when cursor over project name of 'WS Projects'.
@@ -480,7 +488,7 @@
         <div id="listWsProjects"></div>
         <details ontoggle="showHistoryWsServers()">
             <summary title="press right button to open context menu" oncontextmenu="openMenuHistoryActions(event)">
-                History WS servers:</summary>
+                History WS servers&nbsp;<span onclick="openMenuHistoryActions(event)">&#9783;</span></summary>
             <p>In this panel you can choose previously successfuly used web socket servers that we stored in history of
                 your web browser during your testing. If this list is empty, try send something to demoserver which is
                 proposed by default.</p>
@@ -494,7 +502,7 @@
             <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
                 <h4>&#9776; WebSocket Client</h4>
             </div>
-            <div id="release">v1.0.27RC</div>
+            <div id="release">v1.0.28</div>
             <div id="newrelease"></div>
         </div>
 
@@ -533,6 +541,7 @@
         <div id="menuProjectActions" class="dropdownmenu" style="display: none;">
             <b id="namemenuProjectActions"></b>
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
+            <p id="removeProject" onclick="clickMenuItemOnProjectActions(event)">Remove project</p>
             <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
         </div>
 
@@ -823,28 +832,7 @@
             et.target.parentElement.style.display = "none";
         }
 
-        function openMenuProjectActions(e) {
 
-            e.preventDefault();
-
-            var menu = document.getElementById("menuProjectActions");
-
-            // close other elements with class "dropdownmenu"
-            closeDropDownLists(menu.id);
-
-            // add title in itmes of menu according to target (target here is souce of event)
-            var _wsprojectname = e.target.innerHTML;
-            document.getElementById("exportProject").title = _wsprojectname ?? '';
-            document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
-
-            // write title of menu
-            document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;
-
-            // show 'context menu'
-            menu.style.left = e.pageX + "px";
-            menu.style.top = e.pageY + "px";
-            menu.style.display = "block";
-        }
 
         function clickMenuItemOnProjectActions(et) {
             // do operations according to context menu here:
@@ -866,6 +854,63 @@
                 link.download = `${_wsprojectid}.wsclient`;
                 link.click();
                 URL.revokeObjectURL(link.href);
+            }
+
+            if (actionName === 'removeProject') {
+                var result = confirm(`Want to delete WS project: "${_wsprojectname}" ? Message history and WS servers of project will be deleted as well.`);
+                if (result) {
+                    var deleteactivews = false;
+                    if (_wsprojectname === wsProjectName) {
+                        console.log('delete active');
+                        deleteactivews = true;
+                        //closeConnect();
+                    }
+                    if (arrProjects.indexOf(_wsprojectname) >= 0) {
+                        var indextoremove = arrProjects.indexOf(_wsprojectname);
+                        var newarrprojects = [];
+                        for (let index = 0; index < arrProjects.length; index++) {
+
+                            if (index !== indextoremove) {
+                                if (arrProjects[index] !== null) {
+                                    newarrprojects.push(arrProjects[index]);
+                                }
+                            }
+                        }
+                        arrProjects = newarrprojects;
+
+                        var json_projects_str = JSON.stringify(arrProjects);
+                        localStorage.setItem("wsmsprojects", json_projects_str);
+
+                        if (_wsprojectid !== '') {
+                            if (localStorage.getItem(`${_wsprojectid}wsmsservers`) !== null) {
+                                localStorage.removeItem(`${_wsprojectid}wsmsservers`);
+                            }
+                            if (localStorage.getItem(`${_wsprojectid}wsmshistory`) !== null) {
+                                localStorage.removeItem(`${_wsprojectid}wsmshistory`);
+                            }
+                        }
+
+                        if (document.getElementById(_wsprojectid) !== null) {
+                            var _removeelement =  document.getElementById(_wsprojectid);
+                           _removeelement.remove();
+                        }
+
+                        if (deleteactivews) {
+
+                            document.getElementById("nameProject").value = '';
+                            wsProjectName = '';
+                            setProjectId();
+                            setArrHistory();
+                            reloadHistory();
+                            setArrWSservers();
+                            reloaNav();
+                            reloadProjects();
+                        }
+
+                        // close side bar
+                        closeNav();
+                    }
+                }
             }
 
 
@@ -1006,16 +1051,17 @@
             wsprojectname.innerHTML = `${wsproject}`;
             wsprojectname.oncontextmenu = openMenuProjectActions;
 
-            var wsprojectclose = document.createElement("p");
-            wsprojectclose.title = "remove from history";
-            wsprojectclose.onclick = removeWsProject;
-            wsprojectclose.className = "wsprojectclose";
-            wsprojectclose.innerHTML = "&times;";
+            var wsprojectmenu = document.createElement("p");
+            wsprojectmenu.title = "project menu";
+            wsprojectmenu.onclick = openMenuProjectActions;
+            wsprojectmenu.oncontextmenu = openMenuProjectActions;
+            wsprojectmenu.className = "wsprojectmenu";
+            wsprojectmenu.innerHTML = "&nbsp;&brvbar;&nbsp;";
 
             var wsprojectrow = document.createElement("div");
             wsprojectrow.className = "wsprojectrow";
             wsprojectrow.appendChild(wsprojectname);
-            wsprojectrow.appendChild(wsprojectclose);
+            wsprojectrow.appendChild(wsprojectmenu);
 
             var wsprojectsummary = document.createElement("summary");
             wsprojectsummary.className = "wssummary";
@@ -1026,6 +1072,7 @@
 
 
             var wsprojectdetails = document.createElement("details");
+            wsprojectdetails.setAttribute("id", `${convertProjectNameToId(wsproject)}`);
             wsprojectdetails.ontoggle = showProjectWsServers;
             wsprojectdetails.className = "wsproject";
             wsprojectdetails.appendChild(wsprojectsummary);
@@ -1067,65 +1114,28 @@
                 closeNav();
             }
 
-            function removeWsProject() {
-                var result = confirm(`Want to delete WS project: "${wsproject}" ? Message history and WS servers of project will be deleted as well.`);
-                if (result) {
-                    var _wsProjectId = convertProjectNameToId(wsproject) ?? '';
-                    var deleteactivews = false;
-                    if (wsproject === wsProjectName) {
-                        console.log('delete active');
-                        deleteactivews = true;
-                        //closeConnect();
-                    }
-                    if (arrProjects.indexOf(wsproject) >= 0) {
-                        var indextoremove = arrProjects.indexOf(wsproject);
-                        var newarrprojects = [];
-                        for (let index = 0; index < arrProjects.length; index++) {
+            function openMenuProjectActions(e) {
 
-                            if (index !== indextoremove) {
-                                if (arrProjects[index] !== null) {
-                                    newarrprojects.push(arrProjects[index]);
-                                }
-                            }
-                        }
-                        arrProjects = newarrprojects;
+                e.preventDefault();
 
-                        var json_projects_str = JSON.stringify(arrProjects);
-                        localStorage.setItem("wsmsprojects", json_projects_str);
+                var menu = document.getElementById("menuProjectActions");
 
-                        if (_wsProjectId !== '') {
-                            if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
-                                localStorage.removeItem(`${_wsProjectId}wsmsservers`);
-                            }
-                            if (localStorage.getItem(`${_wsProjectId}wsmshistory`) !== null) {
-                                localStorage.removeItem(`${_wsProjectId}wsmshistory`);
-                            }
-                        }
+                // close other elements with class "dropdownmenu"
+                closeDropDownLists(menu.id);
 
-                        if (this.parentElement.parentElement !== null) {
-                            if (this.parentElement.parentElement.parentElement != null) {
-                                this.parentElement.parentElement.parentElement.remove();
-                            }
-                        }
+                // add title in itmes of menu according to target (target here is souce of event)
+                var _wsprojectname = wsproject; // e.target.innerHTML;
+                document.getElementById("exportProject").title = _wsprojectname ?? '';
+                document.getElementById("removeProject").title = _wsprojectname ?? '';
+                document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
 
+                // write title of menu
+                document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;
 
-
-                        if (deleteactivews) {
-
-                            document.getElementById("nameProject").value = '';
-                            wsProjectName = '';
-                            setProjectId();
-                            setArrHistory();
-                            reloadHistory();
-                            setArrWSservers();
-                            reloaNav();
-                            reloadProjects();
-                        }
-
-                        // close side bar
-                        closeNav();
-                    }
-                }
+                // show 'context menu'
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+                menu.style.display = "block";
             }
         }
 
@@ -1136,7 +1146,6 @@
             var wshistname = document.createElement("p");
             wshistname.style.wordWrap = "break-word";
             wshistname.className = "wshistname"
-            // wshistname.href = `javascript:void(0)`;
             wshistname.onclick = chooseWsServer;
             wshistname.title = "click to choose";
             wshistname.setAttribute("prjname", wrprojectname);
@@ -1147,7 +1156,7 @@
             wshistclose.onclick = removeWsServer;
             wshistclose.className = "wshistclose";
             wshistclose.setAttribute("prjname", wrprojectname);
-            wshistclose.innerHTML = "&times;";
+            wshistclose.innerHTML = "&nbsp;&times;";
 
             var wshistrow = document.createElement("div");
             wshistrow.className = "wshistrow";
