@@ -929,10 +929,31 @@
                 var link = document.createElement("a");
                 var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
                 var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
+
+                // add main content
                 var content = `projectname:${_wsprojectname}\n`
                     + `projectid:${_wsprojectid}\n`
                     + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
                     + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
+
+                try {
+                    // try to add to content specific parameters
+                    var _arrwsmsservers = JSON.parse(_listwsmsservers);
+                    _arrwsmsservers.forEach(_wsserver => {
+                        var _keywsparameters = getKeyWSParameters(_wsprojectname, _wsserver, 'query') ?? '';
+                        if (_keywsparameters !== '') {
+                            var _listwsmsparameters = localStorage.getItem(`${_keywsparameters}`);
+                            if (_listwsmsparameters !== null) {
+                                content = content + `${_keywsparameters}:${_listwsmsparameters}\n`;
+                            }
+                            
+                        }
+                    });
+                    
+                } catch (error) {
+                    
+                }
+
                 const file = new Blob([content], { type: 'text/plain' });
                 link.href = URL.createObjectURL(file);
                 link.download = `${_wsprojectid}.wsclient`;
@@ -967,6 +988,18 @@
 
                         if (_wsprojectid !== '') {
                             if (localStorage.getItem(`${_wsprojectid}wsmsservers`) !== null) {
+                                try {
+                                    var _listwsmsservers = localStorage.getItem(`${_wsprojectid}wsmsservers`) ?? '[]';
+                                    var _arrwsmsserver = JSON.parse(_listwsmsservers);
+                                    array.forEach(_wsmsserver => {
+                                        deleteWSParameters(_wsprojectname, _wsmsserver, 'query');
+                                    });
+
+                                } catch (error) {
+                                    
+                                }
+                                
+                                
                                 localStorage.removeItem(`${_wsprojectid}wsmsservers`);
                             }
                             if (localStorage.getItem(`${_wsprojectid}wsmshistory`) !== null) {
@@ -1035,10 +1068,30 @@
                 var link = document.createElement("a");
                 var _listwsmsservers = `${localStorage.getItem(`${_wsprojectid}wsmsservers`)}`;
                 var _listwsmshistory = `${localStorage.getItem(`${_wsprojectid}wsmshistory`)}`;
+
+                // add main content
                 var content = `projectname:${_wsprojectname}\n`
                     + `projectid:${_wsprojectid}\n`
                     + `${_wsprojectid}wsmsservers:${_listwsmsservers}\n`
                     + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
+
+                try {
+                    // try to add to content specific parameters
+                    var _arrwsmsservers = JSON.parse(_listwsmsservers);
+                    _arrwsmsservers.forEach(_wsserver => {
+                        var _keywsparameters = getKeyWSParameters(_wsprojectname, _wsserver, 'query') ?? '';
+                        if (_keywsparameters !== '') {
+                            var _listwsmsparameters = localStorage.getItem(`${_keywsparameters}`);
+                            if (_listwsmsparameters !== null) {
+                                content = content + `${_keywsparameters}:${_listwsmsparameters}\n`;
+                            }
+                            
+                        }
+                    });
+                    
+                } catch (error) {
+                    
+                }                    
                 const file = new Blob([content], { type: 'text/plain' });
                 link.href = URL.createObjectURL(file);
                 link.download = `wshistory_.wsclient`;
@@ -1263,10 +1316,12 @@
                     reloadHistory();
                     setArrWSservers();
                     reloaNav();
+                    reloadQueries();
 
                 } else {
                     setArrHistory();
                     reloadHistory();
+                    reloadQueries();
                 }
                 // close side bar
                 closeNav();
@@ -1297,7 +1352,7 @@
             }
         }
 
-        function addNavElement(wsserver, wrprojectname) {
+        function addWSserverElement(wsserver, wrprojectname) {
 
             var wsproject_id = convertProjectNameToId(wrprojectname) ?? '';
             var wshistname = document.createElement("p");
@@ -1341,9 +1396,9 @@
 
 
                 if (anotherserver) {
-
-                    reConnect();
                     reloadQueries();
+                    reConnect();
+
                     localStorage.setItem("wsmsserveractive", wsUri);
                 }
 
@@ -1388,6 +1443,7 @@
                         var json_nav_str = JSON.stringify(_arrNav);
 
                         localStorage.setItem(`${_wsProjectId}wsmsservers`, json_nav_str);
+                        deleteWSParameters(_wsProjectName, wsserver, 'query');
                         this.parentElement.remove();
 
                     }
@@ -1419,6 +1475,7 @@
                                 wsUri = '';
                                 localStorage.setItem("wsmsserveractive", wsUri);
                             }
+                            deleteWSParameters(_wsProjectName, wsserver, 'query');
                             reloaNav();
                             reloadQueries();
                             // close side bar
@@ -1568,7 +1625,7 @@
         function reloaNav() {
             document.getElementById(`${wsProjectId}listWsServersHistory`).innerHTML = '';
             arrNav.forEach((item) => {
-                addNavElement(`${item}`, `${wsProjectName}`);
+                addWSserverElement(`${item}`, `${wsProjectName}`);
             })
         }
 
@@ -1577,7 +1634,7 @@
             if (document.getElementById(`${_wsProjectId}listWsServersHistory`) !== null) {
                 document.getElementById(`${_wsProjectId}listWsServersHistory`).innerHTML = '';
                 _arrNav.forEach((item) => {
-                    addNavElement(`${item}`, `${_wsProjectName}`);
+                    addWSserverElement(`${item}`, `${_wsProjectName}`);
                 })
             }
 
@@ -1649,7 +1706,30 @@
             }
             return arrparams;
         }  
-        
+
+        function getKeyWSParameters(_projectname, _wsserver, _paramtype) {
+            var _keywsparameters = '';
+            var _wsProjectId = convertProjectNameToId(_projectname) ?? '';
+            var _wsserverId = convertWsServerNameToId(_wsserver) ?? '';
+            if (_wsserverId !== '') {
+                _keywsparameters = `${_wsProjectId}_${_wsserverId}_${_paramtype}`;
+            }
+            return _keywsparameters;
+        }          
+
+        function deleteWSParameters(_projectname, _wsserver, _paramtype) {
+            try {
+                var _keywsparameters = getKeyWSParameters(_projectname, _wsserver, _paramtype) ?? '';
+                if (_keywsparameters !== ''){
+                    localStorage.removeItem(`${_keywsparameters}`);
+                }
+                
+            } catch (error) {
+                
+            }
+
+        }      
+
         function getParametersQueryString(_projectname, _wsserver) {
             var _stringquery = '';
             var arrqueries = getArrWSParameters(wsProjectName, wsUri, 'query') ?? [];
