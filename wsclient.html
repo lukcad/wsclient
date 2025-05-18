@@ -503,7 +503,7 @@
         <details style="padding-top: 24px;">
             <summary title="press right button to open context menu" oncontextmenu="openMenuWSProjectsActions(event)">WS
                 projects&nbsp;<span onclick="openMenuWSProjectsActions(event)">&#9783;</span></summary>
-            <p>In this group of left side bar you can choose the previously saved ws-servers and the history messages
+            <p>In this group you can choose the previously saved ws-servers and the history messages
                 per project.
                 Using context menu of name group `WS Project` you can import file with new projects in this group or
                 re-import with enrichment existing projects.
@@ -535,15 +535,15 @@
         <details>
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers will be saved under name of this
-                project or added in project with similar name in group of left side menu 'WS Projects'.
-                Check list of the existing projects by opening left side bar using icon &#9776;
+                project or added in project with similar name in group of left slide menu 'WS Projects'.
+                Check list of the existing projects by opening left slide menu using icon &#9776;
             </p>
         </details>
         <input type="text" id="nameProject" onchange="changeProject()" value="" /> </br>
         <details>
             <summary>WS Server to interact with messages:</summary>
-            <p>You should point here your ws-server manually or choose it from group 'WS Projects' by left navigation
-                bar by opening icon &#9776;
+            <p>You should point here your ws-server manually or choose it from group 'WS Projects' by left slide
+                menu by opening icon &#9776;
                 When you enter new ws-server manually you have to use button 'Reconnect' to be able strart connection to
                 pointed server. </p>
         </details>
@@ -719,7 +719,7 @@
 
         initProjectNameAndId()
 
-        // left bar navigation for `WS projects`
+        // left slide menu navigation for `WS projects`
 
         var arrProjects = [];
         var json_projects_str = '[]';
@@ -737,7 +737,7 @@
             }
         }
 
-        // left bar navigation for `History WS servers`
+        // left slide menu navigation for `History WS servers`
         var arrNav;
 
         function setArrWSservers() {
@@ -1030,7 +1030,7 @@
                             reloadProjects();
                         }
 
-                        // close side bar
+                        // close left slide menu
                         closeNav();
                     }
                 }
@@ -1154,7 +1154,7 @@
                                 // import the whole list of wsmsservers because it is a new _key
                                 localStorage.setItem(_key, _values);
                                 if (_key.includes('wsmsservers')) {
-                                    // reload Navigation actoss servers in left side menu
+                                    // reload Navigation actoss servers in left slide menu
                                     var _arr_new = JSON.parse(_values);
                                     reloaNavBy(_projectname, _arr_new);
                                 }
@@ -1181,7 +1181,7 @@
                                 localStorage.setItem(_key, json_merged_str);
 
                                 if (_key.includes('wsmsservers')) {
-                                    // reload Navigation actoss servers in left side menu
+                                    // reload Navigation actoss servers in left slide menu
                                     reloaNavBy(_projectname, _arr_existing);
                                 }
                             }
@@ -1220,7 +1220,7 @@
                                 // import the whole list of wsmsservers because it is a new _key
                                 localStorage.setItem(_key, _values);
                                 if (_key.includes('wsmsservers')) {
-                                    // reload Navigation actoss servers in left side menu
+                                    // reload Navigation actoss servers in left slide menu
                                     var _arr_new = JSON.parse(_values);
                                     reloaNavBy(_projectname, _arr_new);
                                 }
@@ -1247,7 +1247,7 @@
                                 localStorage.setItem(_key, json_merged_str);
 
                                 if (_key.includes('wsmsservers')) {
-                                    // reload Navigation actoss servers in left side menu
+                                    // reload Navigation actoss servers in left slide menu
                                     reloaNavBy(_projectname, _arr_existing);
                                 }
                             }
@@ -1329,7 +1329,7 @@
                     reloadHistory();
                     reloadQueries();
                 }
-                // close side bar
+                // close lefyt slide menu
                 closeNav();
             }
 
@@ -1419,7 +1419,7 @@
                     reloadHistory();
                     reloadQueries();
                 }
-                // close side bar
+                // close left slide menu
                 closeNav();
             }
 
@@ -1484,7 +1484,7 @@
                             deleteWSParameters(_wsProjectName, wsserver, 'query');
                             reloaNav();
                             reloadQueries();
-                            // close side bar
+                            // close left slide menu 
 
                         }
                     }

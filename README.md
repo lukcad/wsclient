@@ -2,7 +2,7 @@
 
 ## Overview
 
-`wsclient.html` is a single client file which works in all browsers by using just only HTML and pure javascipt.
+`wsclient.html` is a single client file which works in all web browsers by using just only HTML and pure javascript with saving history, ws-servers and your projects into local storage of web browser.
 
 ### Arcitecture
 
@@ -36,7 +36,7 @@
   - List of `WS Parameters` where you can at this moment:
     - add new parameter with type `query` and your required name and value;
     - remove not needing parameter;
-    
+
       Notice: `WS parameters` list help you add necessary prarameters which some ws-servers use for authentication, currntly it is one of the simpelst ways to verify authentication during connection of client to ws-server; Because there are another ways of authentication, in next releases new type of parameter can be added.
 
   - Panel `Messages` shows all conversation with web socket server:
@@ -48,7 +48,7 @@
   - Panel `Histoy of sending unical messages` helps you keep history of messages to re-use those for re-sending when you re-open client or clean up messages.
     - pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
     - you can remove any message from `History` of messages by using `X` button  with confirmation prompt.
-  - icon button &#9776; in upper left corner of main working area opens `Left side menu`.
+  - icon button &#9776; in upper left corner of main working area opens `Left slide menu`.
 
 - LEFT SLIDE MENU:
 
@@ -80,11 +80,27 @@
 
 ## How ot use
 
-You can simply clone project from GitHub and start use file [`wsclient.html`](wsclient.html) for your testing of sending messages to web socket servers, by using in terminal of your VS code studio this command:
+You can simply clone project from GitHub and start use file [`wsclient.html`](wsclient.html) by any web browser locally on your computer or mobile for your testing and sending messages to web socket servers.
 
+I recommend clone repository using git command
+
+```bash
+git clone https://github.com/lukcad/wsclient.git
 ```
-git clone https://github.com/lukcad/wsclie
+
+and then create `link` to `wsclient.html` file to let use this link by web-browser (`Firefox`, `Chrome`, `Edge`, `Opera`) when you need provide websoket testing on your local workstation or on your own Mobile. Also, having git clone it will be easier to update new version of client when you get message about new release. It is more convinient just pull new version from git rather than download new zip file, extract and copy `wsclient.html` file.
+
+```bash
+git pull https://github.com/lukcad/wsclient.git
 ```
+
+Notices:
+
+- All your projects and history will be saved by this WebSocket client into your browser only.
+- New version of client does not impact previously created projects, so after upgrade to new version you can continue use your previously created projects.
+- You can easily export and import projects between web browsers to save time if you need provide testing sockets from different web browsers.
+- On Mobile `websocket.html` you can open by any `File manager`. And during opening you can use these web browsers in mobile mode: `Edge`, `Chrome`, `FireFox`, `Opera`, `Samsung Intenet` and many others that support local storage.
+- If you clean up local storage of yoour web browser (you can do it by settings in browser) then you will clean up all projects and history for websocket client. Recommendation here: export (by functionality of websocket client) time by time important projects to your local file storage of workstation.
 
 ![alt text](image.png)
 ![alt text](image-1.png)
