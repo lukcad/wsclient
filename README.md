@@ -33,6 +33,12 @@
   - button `Reconnect` to start connection to WS server again after stop.
   - button `Clean Messages` to remove messages from panel `Messages`.
   - button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unical.
+  - List of `WS Parameters` where you can at this moment:
+    - add new parameter with type `query` and your required name and value;
+    - remove not needing parameter;
+    
+      Notice: `WS parameters` list help you add necessary prarameters which some ws-servers use for authentication, currntly it is one of the simpelst ways to verify authentication during connection of client to ws-server; Because there are another ways of authentication, in next releases new type of parameter can be added.
+
   - Panel `Messages` shows all conversation with web socket server:
     - what message you sent;
     - what response has been received;

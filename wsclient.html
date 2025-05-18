@@ -528,7 +528,7 @@
             <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
                 <h4>&#9776; WebSocket Client</h4>
             </div>
-            <div id="release">v1.0.28</div>
+            <div id="release">v1.0.29</div>
             <div id="newrelease"></div>
         </div>
 
@@ -550,12 +550,18 @@
         <input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
         <details>
             <summary>WS Parameters:</summary>
-            <p>You can point the necessary parameters that should be applied to ws-server. For xeample: for token
+            <p>You can point the necessary parameters that should be applied to ws-server when you create connect to it. For example: for token
                 authentication you maybe needing to add parameter 'token' with required value.</p>
         </details>
         <div id="listParameters"></div>
 
         <div class="paramTopRow"></div>
+        <div class="paramRow">
+            <div style="background-color: dimgray;color: white;" >Type:</div>
+            <div style="background-color: dimgray;color: white;">Name parameter:</div>
+            <div style="background-color: dimgray;color: white;">Value parameter:</div>
+            <div style="background-color: dimgray;color: white;"></div>
+        </div>
         <div id="queryList" class="paramRow"></div>
         <div class="paramRow">
             <div>
@@ -570,7 +576,7 @@
                 <input type="text" id="valueNewParameter" value="" />
             </div>
             <div>
-                <button class="btn" style="width: 100%;" onclick="addParameters()">Add</button>
+                <button class="btn" style="width: 100%;" title="Add parameter to this ws-server" onclick="addParameters()">Add</button>
             </div>
         </div>
         <div class="paramTopRow"></div>
@@ -1560,22 +1566,23 @@
 
             var parType = document.createElement("div");
             parType.style.wordWrap = "break-word";
-            parType.style.color = `gray`;
+            parType.style.color = `dimgray`;
             parType.innerHTML = _partype;
 
             var parName = document.createElement("div");
             parName.style.wordWrap = "break-word";
-            parName.style.color = `gray`;
+            parName.style.color = `dimgray`;
             parName.innerHTML = _parname;
 
             var parVal = document.createElement("div");
             parVal.style.wordWrap = "break-word";
-            parVal.style.color = `gray`;
+            parVal.style.color = `dimgray`;
             parVal.innerHTML = _parval;  
             
             var parAct = document.createElement("div");
+            parAct.title = "Remove parameter";
             parAct.style.wordWrap = "break-word";
-            parAct.style.color = `gray`;
+            parAct.style.color = `dimgray`;
             parAct.style.cursor = `pointer`;
             parAct.onclick = deleteParamVal;
             parAct.innerHTML = '&times;'; 
