@@ -157,15 +157,15 @@
             position: absolute;
             z-index: 1;
             top: 125%;
-            left: 40%;
-            margin-left: -80px;
+            left: 20%;
+            margin-left: -160px;
         }
 
         .newreleasebadge .newReleasePopup::after {
             content: "";
             position: absolute;
             bottom: 100%;
-            left: 40%;
+            left: 70%;
             margin-left: -5px;
             border-width: 5px;
             border-style: solid;
@@ -407,6 +407,7 @@
             padding: 0;
             width: 140px;
             background-color: white;
+
         }
 
         #menuProjectActions p {
@@ -478,7 +479,7 @@
         .paramRow {
             font-size: 12px;
             display: grid;
-            grid-template-columns: 55px 150px auto 35px;
+            grid-template-columns: 52px auto auto 35px;
             clear: both;
             gap: 1px;
             background-color: white;
@@ -650,6 +651,9 @@
     </div>
 
     <script>
+
+        // slide menu width
+        var slideMenuWidth = 250;
 
         // create client to be able check new version of wsclient
         var HttpClient = function () {
@@ -898,7 +902,12 @@
             document.getElementById("namemenuWSProjectsActions").innerHTML = 'WS Projects';
 
             // show 'context menu'
-            menu.style.left = e.pageX + "px";
+            if (e.pageX > (slideMenuWidth - 140))
+            {
+                menu.style.left = (slideMenuWidth - 140) + "px";
+            } else {
+                menu.style.left = e.pageX + "px";
+            }
             menu.style.top = e.pageY + "px";
             menu.style.display = "block";
         }
@@ -1058,7 +1067,12 @@
             document.getElementById("namemenuHistoryActions").innerHTML = 'History WS servers';
 
             // show 'context menu'
-            menu.style.left = e.pageX + "px";
+            if (e.pageX > (slideMenuWidth - 140))
+            {
+                menu.style.left = (slideMenuWidth - 140) + "px";
+            } else {
+                menu.style.left = e.pageX + "px";
+            }
             menu.style.top = e.pageY + "px";
             menu.style.display = "block";
         }
@@ -1352,7 +1366,12 @@
                 document.getElementById("namemenuProjectActions").innerHTML = _wsprojectname;
 
                 // show 'context menu'
-                menu.style.left = e.pageX + "px";
+                if (e.pageX > (slideMenuWidth - 140))
+                {
+                    menu.style.left = (slideMenuWidth - 140) + "px";
+                } else {
+                    menu.style.left = e.pageX + "px";
+                }
                 menu.style.top = e.pageY + "px";
                 menu.style.display = "block";
             }
@@ -1656,7 +1675,7 @@
         }
 
         function openNav() {
-            document.getElementById("barSideNav").style.width = "250px";
+            document.getElementById("barSideNav").style.width = `${slideMenuWidth}px`;
 
         }
 
