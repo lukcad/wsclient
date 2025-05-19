@@ -582,8 +582,9 @@
         <details>
             <summary>WS Project:</summary>
             <p> You can point name of project and your next operations with ws-servers will be saved under name of this
-                project or added in project with similar name in group of left slide menu 'WS Projects'.
-                Check list of the existing projects by opening left slide menu using icon &#9776;
+                project. You can find created project by slide menu using icon &#9776;<br>
+                <b>Important:</b> Projects will be combined if they have the same <b>generated key</b>. For example: project
+                'Project 1' and 'Project1' will have the same key <b>'Project1_'</b>.
             </p>
         </details>
         <input type="text" id="nameProject" onchange="changeProject()" value="" /> </br>
@@ -899,11 +900,51 @@
             reloaNavBy(_wsproject, _arrNav);
         }
 
+        function getarrProjectsWithProjectID(_filterbyid) {
+            var _arrprojectswithid = [];
+            var _arrprojects = [];
+            var _listwsmsprojects = localStorage.getItem('wsmsprojects');
+            if (_listwsmsprojects !== null){
+                if ((_listwsmsprojects !== '') & (_listwsmsprojects.includes('[')) & (_listwsmsprojects.includes(']'))){
+                    _arrprojects = JSON.parse(_listwsmsprojects) ?? [];
+                    _arrprojects.forEach(_prj => {
+                        var _prjwithid = `${convertProjectNameToId(_prj)}::${_prj}`;
+                        if ((_filterbyid ?? '') === '') {
+                            _arrprojectswithid.push(_prjwithid);  
+                        } else {
+                            if ((_filterbyid) === convertProjectNameToId(_prj)) {
+                                _arrprojectswithid.push(_prjwithid);
+                            }
+                        }
+                        
+                    });
+                }
+            }
+            return _arrprojectswithid;
+        }
+
+        function convertToExistingProjectName(_wsprojectname){
+            var _wsProjectId = convertProjectNameToId(_wsprojectname);
+            var arrProjectsWithId = getarrProjectsWithProjectID(_wsProjectId);
+            if (arrProjectsWithId.length > 0){
+                if (arrProjectsWithId[0].includes('::')){
+                    var _wsprojectnameexisting = arrProjectsWithId[0].split('::')[1];
+                    if (_wsprojectnameexisting !== _wsprojectname){
+                        _wsprojectname = _wsprojectnameexisting;
+                        document.getElementById("nameProject").value  = _wsprojectname;
+                    }
+                }
+                
+            }            
+            
+            return _wsprojectname;
+        }
+
         function setProjectId() {
 
-            wsProjectName = (document.getElementById("nameProject").value ?? '').trim();
-            var _wsProjectId = `${wsProjectName.replace(/[^A-Za-z0-9]/g, '')}`;
-            wsProjectId = (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
+            var _wsprojectname = (document.getElementById("nameProject").value ?? '').trim();
+            wsProjectId = convertProjectNameToId(_wsprojectname);
+            wsProjectName = convertToExistingProjectName(_wsprojectname);
             localStorage.setItem("wsmsprojectactive", wsProjectName);
             console.log(wsProjectId);
 
@@ -915,6 +956,7 @@
         }
 
         function convertWsServerNameToId(_wsserver) {
+            _wsserver = _wsserver.trim();
             var _wsserverId = `${_wsserver.replace(/[^A-Za-z0-9]/g, '')}`;
             return _wsserverId;
         }
@@ -1212,6 +1254,10 @@
 
                         _projectname = (line.split('projectname:')[1]) ?? '';
                         if (_projectname !== '') {
+                            // convert project name if we have project name which generates the same id.
+                            _projectname = convertToExistingProjectName(_projectname);
+
+
                             if (arrProjects.indexOf(_projectname) < 0) {
                                 arrProjects.push(_projectname);
                                 var json_prj_str = JSON.stringify(arrProjects);
