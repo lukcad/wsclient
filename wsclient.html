@@ -128,6 +128,53 @@
             margin-right: 10px;
         }
 
+        #release {
+            display: inline-block;
+            background-color: rgb(241, 222, 50);
+            color: white;
+            padding: 4px 8px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;            
+        }
+
+        #release .ReleasePopup {
+            visibility: hidden;
+            background-color: #3be42b;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            top: 125%;
+            left: 20%;
+            margin-left: -160px;
+        }
+
+        #release .ReleasePopup::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 75%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #3be42b transparent;
+        }
+
+        #release .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s;
+        }        
+
         .newreleasebadge {
             background-color: red;
             color: white;
@@ -143,9 +190,7 @@
             user-select: none;
         }
 
-        #release {
-            display: inline-block;
-        }
+
 
         .newreleasebadge .newReleasePopup {
             visibility: hidden;
@@ -165,7 +210,7 @@
             content: "";
             position: absolute;
             bottom: 100%;
-            left: 70%;
+            left: 75%;
             margin-left: -5px;
             border-width: 5px;
             border-style: solid;
@@ -493,6 +538,7 @@
             word-break: break-all;
             background-color: #f1f1f1;
         }
+
     </style>
 </head>
 
@@ -529,8 +575,8 @@
             <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
                 <h4>&#9776; WebSocket Client</h4>
             </div>
-            <div id="release">v1.0.29</div>
-            <div id="newrelease"></div>
+            <div id="release" title="About program">v1.0.30</div>
+            <div id="newrelease" title="About new release"></div>
         </div>
 
         <details>
@@ -711,6 +757,23 @@
             }
 
         });
+
+        // prepare information about program (when press number version on MAIN WORKING AREA)
+
+        var ReleasePopup = document.createElement("span");
+        ReleasePopup.id = "ReleasePopup";
+        ReleasePopup.className = "ReleasePopup";
+        ReleasePopup.innerHTML = `ABOUT:<br><br> WebSocket client to test<br>and keep test projects<br>with messages and servers<br><br>Latest commit of release<br> you can get from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6> `;
+
+        var Release = document.getElementById("release");
+        Release.onclick = toogleReleasePopup;
+        Release.appendChild(ReleasePopup);
+
+        function toogleReleasePopup() {
+            var popup = document.getElementById("ReleasePopup");
+            popup.classList.toggle("show");
+        }        
+
 
 
         // Create a WebSocket instance
