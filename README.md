@@ -57,16 +57,18 @@
   - Group `WS Projects`
 
     - You can `add new project` with by executing sending request when `Project name` is filled in or `enrich existing project`.
+    - You can `re-name project` together with relevant ws servers and history using context menu by right button or icon &nbsp;&brvbar;&nbsp; and then by choosing `Re-name project`.
     - You can `remove project` together with relevant ws servers and history using context menu by right button or icon &nbsp;&brvbar;&nbsp; and then by choosing `Remove project`.
     - You can `ws-server remove from project` if you expand list servers and press icon &times; against name of server.
-    - if you have to `import new project` or `enrich existing project` from your local machine you can do it by context menu pressing right button on name group `WS projects` and press `Import project/history`. Also you can open context menu to execute this operation by using icon &#9783;.
-    - if you have to `export project` you can press the name of project by right button to start context menu where you can choose `Export project` item.
+    - if you have to `import new project` or `enrich existing project` from your local file you can do it by context menu pressing right button on name group `WS projects` and press `Import project`. Also you can open context menu to execute this operation by using icon &#9783;.
+    - if you have to `export project` using context menu by right button or icon &nbsp;&brvbar;&nbsp; and then by choosing `Export project`.
 
   - Group `History WS servers`
 
     - You can `add new ws-server` here when send successful message with empty `Project name`.
     - You can `remove` any `ws server` using icon &times;
-    - you can `export history ws-servers` by pressing righ button on `History WS servers` and choosing from context menu `Export history` item. Also you can open context menu to execute this operation by using icon &#9783;.
+    - You can `import history ws-servers` from local file by pressing pressing righ button on `History WS servers` and choosing from context menu `Import history` item. Also you can open context menu to execute this operation by using icon &#9783;.
+    - you can `export history ws-servers` to local file by pressing righ button on `History WS servers` and choosing from context menu `Export history` item. Also you can open context menu to execute this operation by using icon &#9783;.
 
 ### General Notices
 
@@ -107,3 +109,5 @@ Notices:
 ![alt text](image-2.png)
 ![alt text](image-3.png)
 ![alt text](image-4.png)
+![alt text](image-5.png)
+![alt text](image-6.png)
