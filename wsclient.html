@@ -539,6 +539,42 @@
             background-color: #f1f1f1;
         }
 
+        .wsmodal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .wsmodal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        .wsmodalclose {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .wsmodalclose:hover,
+        .wsmodalclose:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }        
+
     </style>
 </head>
 
@@ -651,6 +687,7 @@
         <!--Action menu for porjects. Hidden and appear only by right click-->
         <div id="menuProjectActions" class="dropdownmenu" style="display: none;">
             <b id="namemenuProjectActions"></b>
+            <p id="renameProject" onclick="clickMenuItemOnProjectActions(event)">Re-name project</p>            
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
             <p id="removeProject" onclick="clickMenuItemOnProjectActions(event)">Remove project</p>
             <p id="closeProjectMenu" onclick="clickMenuItemOnProjectActions(event)">Close menu</p>
@@ -697,6 +734,19 @@
         </div>
     </div>
 
+    <!-- The Modal dialog to change Name of Project-->
+    <div id="wsProjectModal" class="wsmodal">
+        <!-- Name change of Project Modal content -->
+        <div class="wsmodal-content">
+            <span class="wsmodalclose">&times;</span>
+            <p>Old project name:</p>
+            <input id="wsModalinp1" type="text"></input>
+            <p>New project name:</p>
+            <input id="wsModalinp2" type="text"></input>  
+            <button id="modifyname" onclick="changeProjectName(event)" >Change</button>
+        </div>
+    </div>    
+
     <script>
 
         // slide menu width
@@ -738,7 +788,7 @@
                         var newReleasePopup = document.createElement("span");
                         newReleasePopup.id = "newReleasePopup";
                         newReleasePopup.className = "newReleasePopup";
-                        newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull new version from <b>gitHub</b>`;
+                        newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull latest version from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> <br>or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025`;
 
                         var newRelease = document.getElementById("newrelease");
                         newRelease.className = "newreleasebadge";
@@ -764,7 +814,7 @@
         var ReleasePopup = document.createElement("span");
         ReleasePopup.id = "ReleasePopup";
         ReleasePopup.className = "ReleasePopup";
-        ReleasePopup.innerHTML = `ABOUT:<br><br> WebSocket client to test<br>and keep test projects<br>with messages and servers<br><br>Latest commit of release<br> you can get from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6> `;
+        ReleasePopup.innerHTML = `ABOUT:<br><br> WebSocket client to test<br>and keep test projects<br>with messages and servers<br><br>Latest commit of release<br> you can get from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025 `;
 
         var Release = document.getElementById("release");
         Release.onclick = toogleReleasePopup;
@@ -777,6 +827,8 @@
 
 
 
+
+
         // Create a WebSocket instance
         // and connect to the server
         var socket;
@@ -785,25 +837,114 @@
         var wsProjectId;
         var wsProjectName;
 
-        initProjectNameAndId()
+        initProjectNameAndId();
+
+
+        // function to change project name
+        function wschangeProjectName(_wsprojectname) {
+
+            // Get the modal
+            var modal = document.getElementById("wsProjectModal");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("wsmodalclose")[0];
+
+            // open modal
+            modal.style.display = "block";
+            
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            // business: read existing text from _idtochange
+            document.getElementById("wsModalinp1").value = _wsprojectname;
+            
+            // business: read new name and save to _idtochange
+            changeProjectName = function(event) {
+                var _wsprojectnamenew = document.getElementById("wsModalinp2").value.trim();
+                
+
+                if (_wsprojectnamenew !== ''){
+                    var _wsprojectnameexisting = findExistingProjectName(_wsprojectnamenew);
+                    if (_wsprojectnameexisting === '') {
+                        // we ready to rename here and ask last times
+                        var result = confirm(`Want to rename WS project: "${_wsprojectname}" to new name "${_wsprojectnamenew}" ? `);
+                        if (result) {
+                            var _projectid = convertProjectNameToId(_wsprojectname);
+                            var _projectidnew = convertProjectNameToId(_wsprojectnamenew);
+                            for ( var i = 0, len = localStorage.length; i < len; ++i ) {
+                                var _key = localStorage.key( i );
+                                if (_key.startsWith(_projectid)) {
+                                    var _newkey = _key.replace(_projectid, _projectidnew);
+                                    var _tmp = localStorage.getItem(_key) ?? '';
+                                    if (_tmp !== ''){
+                                        localStorage.setItem(_newkey, _tmp);
+                                        
+                                    }
+                                    localStorage.removeItem(_key);
+
+                                }
+                            }
+
+                            var _listprojects = localStorage.getItem('wsmsprojects') ?? '';
+                            if (_listprojects !== ''){
+                                var _wsprojectnameexact = '"' + _wsprojectname + '"';
+                                var _wsprojectnamenewexact = '"' + _wsprojectnamenew + '"';
+                                _listprojects = _listprojects.replace(`${_wsprojectnameexact}`, `${_wsprojectnamenewexact}`);
+                                localStorage.setItem('wsmsprojects', _listprojects);
+                            }
+
+
+                            var renameactiveproject = false;
+                            if (_wsprojectname === wsProjectName) {
+                                document.getElementById("nameProject").value = _wsprojectnamenew;
+                                localStorage.setItem('wsmsprojectactive', _wsprojectnamenew);
+                            }
+                            setProjectId();
+                            setArrHistory();
+                            reloadHistory();
+                            setArrProjects();
+                            setArrWSservers();
+                            reloadProjects();
+                            reloaNav();
+                            reloadQueries();
+                            
+                        
+                            modal.style.display = "none";
+                        } 
+                    } else {
+                            alert(` New project name can not be assigned.\n Because it generates the same key\n which is based on exisiting name or reserver word\n "${_wsprojectnameexisting}"\n Please change new project name!`);
+                        }
+
+                } else {
+                    alert('New project name can not be empty. \n Change name and try again!');
+                }
+
+            }
+        }
 
         // left slide menu navigation for `WS projects`
 
         var arrProjects = [];
-        var json_projects_str = '[]';
-        if (localStorage.getItem("wsmsprojects") !== null) {
-            if (localStorage.getItem("wsmsprojects") !== '') {
-                json_projects_str = localStorage.getItem("wsmsprojects");
+        function setArrProjects() {
+            arrProjects = [];
+            var json_projects_str = '[]';
+            if (localStorage.getItem("wsmsprojects") !== null) {
+                if (localStorage.getItem("wsmsprojects") !== '') {
+                    json_projects_str = localStorage.getItem("wsmsprojects");
+                }
             }
-        }
-        var arrProjectsraw = JSON.parse(json_projects_str);
+            var arrProjectsraw = JSON.parse(json_projects_str);
 
-        for (let index = 0; index < arrProjectsraw.length; index++) {
-            const element = arrProjectsraw[index];
-            if (element !== null) {
-                arrProjects.push(element);
+            for (let index = 0; index < arrProjectsraw.length; index++) {
+                const element = arrProjectsraw[index];
+                if (element !== null) {
+                    arrProjects.push(element);
+                }
             }
         }
+
 
         // left slide menu navigation for `History WS servers`
         var arrNav;
@@ -940,13 +1081,30 @@
             return _wsprojectname;
         }
 
+        function findExistingProjectName(_wsprojectname){
+            var _wsProjectId = convertProjectNameToId(_wsprojectname);
+            var arrProjectsWithId = getarrProjectsWithProjectID(_wsProjectId);
+            if (arrProjectsWithId.length > 0){
+                if (arrProjectsWithId[0].includes('::')){
+                    var _wsprojectnameexisting = arrProjectsWithId[0].split('::')[1];
+                    if (_wsprojectnameexisting !== ''){
+                        return _wsprojectnameexisting;
+                    }
+                }
+                
+            }            
+            
+            return '';
+        }        
+
         function setProjectId() {
 
             var _wsprojectname = (document.getElementById("nameProject").value ?? '').trim();
             wsProjectId = convertProjectNameToId(_wsprojectname);
-            wsProjectName = convertToExistingProjectName(_wsprojectname);
+            if (_wsprojectname !== '') {
+                wsProjectName = convertToExistingProjectName(_wsprojectname);
+            }
             localStorage.setItem("wsmsprojectactive", wsProjectName);
-            console.log(wsProjectId);
 
         }
 
@@ -1044,6 +1202,12 @@
             var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
             var actionName = et.target.id;
 
+            if (actionName === 'renameProject') {
+
+                wschangeProjectName(`${_wsprojectname}`);
+
+            }
+
             if (actionName === 'exportProject') {
                 // here we create dynamically file and save it
                 var link = document.createElement("a");
@@ -1140,8 +1304,9 @@
                             setArrHistory();
                             reloadHistory();
                             setArrWSservers();
-                            reloaNav();
                             reloadProjects();
+                            reloaNav();
+
                         }
 
                         // close left slide menu
@@ -1467,6 +1632,7 @@
 
                 // add title in itmes of menu according to target (target here is souce of event)
                 var _wsprojectname = wsproject; // e.target.innerHTML;
+                document.getElementById("renameProject").title = _wsprojectname ?? '';
                 document.getElementById("exportProject").title = _wsprojectname ?? '';
                 document.getElementById("removeProject").title = _wsprojectname ?? '';
                 document.getElementById("closeProjectMenu").title = _wsprojectname ?? '';
@@ -1529,12 +1695,7 @@
                 wsUri = document.getElementById('nameServer').value = wsserver;
 
 
-                if (anotherserver) {
-                    reloadQueries();
-                    reConnect();
 
-                    localStorage.setItem("wsmsserveractive", wsUri);
-                }
 
                 if (anotherProject) {
                     wsProjectName = document.getElementById('nameProject').value = _wsProjectName;
@@ -1546,6 +1707,13 @@
                     setArrHistory();
                     reloadHistory();
                     reloadQueries();
+                }
+
+                if (anotherserver) {
+                    reloadQueries();
+                    reConnect();
+
+                    localStorage.setItem("wsmsserveractive", wsUri);
                 }
                 // close left slide menu
                 closeNav();
@@ -2060,6 +2228,7 @@
 
 
         initInputOfWeServer();
+        setArrProjects();
         reConnect();
         setArrHistory();
         reloadHistory();
