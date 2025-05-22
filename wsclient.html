@@ -646,10 +646,12 @@
             <div style="background-color: dimgray;color: white;"></div>
         </div>
         <div id="queryList" class="paramRow"></div>
+        <div id="headList" class="paramRow"></div>
         <div class="paramRow">
             <div>
-                <select id="typeNewParameter">
-                    <option value="query">query</option>
+                <select id="typeNewParameter" onchange="changeParamInput(event)">
+                    <option value="query" >query</option>
+                    <option value="head" >head</option>
                 </select>
             </div>
             <div>
@@ -747,6 +749,16 @@
     </div>    
 
     <script>
+
+        function changeParamInput(event) {
+            if (event.target.value === 'head') {
+                document.getElementById('nameNewParameter').value  = 'Sec-WebSocket-Protocol';
+                document.getElementById('nameNewParameter').disabled = true;
+            } else {
+                document.getElementById('nameNewParameter').value  = '';
+                document.getElementById('nameNewParameter').disabled = false;
+            }
+        }
 
         // slide menu width
         var slideMenuWidth = 250;
@@ -858,6 +870,7 @@
 
             // business: read existing text from _idtochange
             document.getElementById("wsModalinp1").value = _wsprojectname;
+            document.getElementById("wsModalinp1").disabled = true;
             
             // business: read new name and save to _idtochange
             changeProjectName = function(event) {
@@ -872,6 +885,7 @@
                         if (result) {
                             var _projectid = convertProjectNameToId(_wsprojectname);
                             var _projectidnew = convertProjectNameToId(_wsprojectnamenew);
+                            var _arrKeysToRemove = [];
                             for ( var i = 0, len = localStorage.length; i < len; ++i ) {
                                 var _key = localStorage.key( i );
                                 if (_key.startsWith(_projectid)) {
@@ -881,10 +895,15 @@
                                         localStorage.setItem(_newkey, _tmp);
                                         
                                     }
-                                    localStorage.removeItem(_key);
+                                    _arrKeysToRemove.push(_key);
+                                    
 
                                 }
                             }
+
+                            _arrKeysToRemove.forEach(_oldkey => {
+                                localStorage.removeItem(_oldkey);
+                            });
 
                             var _listprojects = localStorage.getItem('wsmsprojects') ?? '';
                             if (_listprojects !== ''){
@@ -908,6 +927,7 @@
                             reloadProjects();
                             reloaNav();
                             reloadQueries();
+                            reloadHeads();
                             
                         
                             modal.style.display = "none";
@@ -1220,7 +1240,7 @@
                     + `${_wsprojectid}wsmshistory:${_listwsmshistory}\n`;
 
                 try {
-                    // try to add to content specific parameters
+                    // try to add to content query parameters
                     var _arrwsmsservers = JSON.parse(_listwsmsservers);
                     _arrwsmsservers.forEach(_wsserver => {
                         var _keywsparameters = getKeyWSParameters(_wsprojectname, _wsserver, 'query') ?? '';
@@ -1231,6 +1251,20 @@
                             }
                             
                         }
+                        
+                    });
+
+                    // try to add to content head parameters
+                    _arrwsmsservers.forEach(_wsserver => {
+                        var _keywsparameters = getKeyWSParameters(_wsprojectname, _wsserver, 'head') ?? '';
+                        if (_keywsparameters !== '') {
+                            var _listwsmsparameters = localStorage.getItem(`${_keywsparameters}`);
+                            if (_listwsmsparameters !== null) {
+                                content = content + `${_keywsparameters}:${_listwsmsparameters}\n`;
+                            }
+                            
+                        }
+                        
                     });
                     
                 } catch (error) {
@@ -1276,6 +1310,7 @@
                                     var _arrwsmsserver = JSON.parse(_listwsmsservers);
                                     array.forEach(_wsmsserver => {
                                         deleteWSParameters(_wsprojectname, _wsmsserver, 'query');
+                                        deleteWSParameters(_wsprojectname, _wsmsserver, 'head');
                                     });
 
                                 } catch (error) {
@@ -1610,11 +1645,13 @@
                     setArrWSservers();
                     reloaNav();
                     reloadQueries();
+                    reloadHeads();
 
                 } else {
                     setArrHistory();
                     reloadHistory();
                     reloadQueries();
+                    reloadHeads();
                 }
                 // close lefyt slide menu
                 closeNav();
@@ -1702,14 +1739,17 @@
                     setArrHistory();
                     reloadHistory();
                     reloadQueries();
+                    reloadHeads();
                 } else {
                     setArrHistory();
                     reloadHistory();
                     reloadQueries();
+                    reloadHeads();
                 }
 
                 if (anotherserver) {
                     reloadQueries();
+                    reloadHeads();
                     reConnect();
 
                     localStorage.setItem("wsmsserveractive", wsUri);
@@ -1779,6 +1819,7 @@
                             deleteWSParameters(_wsProjectName, wsserver, 'query');
                             reloaNav();
                             reloadQueries();
+                            reloadHeads();
                             // close left slide menu 
 
                         }
@@ -1908,11 +1949,21 @@
                         var json_str = JSON.stringify(arrparams);
                         localStorage.setItem(`${_wsprojectid}_${_wsserverid}_${_partype}`, json_str);
                         reloadQueries();
+                        reloadHeads();
 
                     }
                 }
             }
 
+        }
+
+        function reloadHeads() {
+            const queryList = document.getElementById('headList');
+            queryList.innerHTML = '';
+            var arrHeads = getArrWSParameters(wsProjectName, wsUri, 'head') ?? [];
+            arrHeads.forEach(_nameval => {
+                addToParametersElement('head', _nameval);
+            });
         }
 
         function reloadQueries() {
@@ -2046,7 +2097,24 @@
                 
             });
             return _stringquery;
-        }          
+        }   
+        
+        function getHeadProtocols(_projectname, _wsserver) {
+            var _arrheadprotocols = [];
+
+            var _arrprotocols = getArrWSParameters(wsProjectName, wsUri, 'head') ?? [];
+            _arrprotocols.forEach(_nameval => {
+                var _parname = _nameval.split('::')[0] ?? '';
+                var _parval = _nameval.split('::')[1] ?? '';
+                if (_parname === 'Sec-WebSocket-Protocol') {
+                    _protocol = `${_parval}`;
+                    _arrheadprotocols.push(_protocol);
+                } 
+                
+            });
+            return _arrheadprotocols;
+        } 
+
 
         function addParameters() {
 
@@ -2057,6 +2125,7 @@
                 if ((_namenewparameter !== '')) {
                     addWSParameter(wsProjectName, wsUri, _typenewparameter, _namenewparameter, _valuenewparameter);
                     reloadQueries();
+                    reloadHeads();
                 } else {
                     alert('Please fill in name of parameter. It is mandatory information.');
                 }
@@ -2072,8 +2141,9 @@
             try {
 
                 var querystr = getParametersQueryString(wsProjectName, wsUri) ?? '';
+                var arrheadprotocols = getHeadProtocols(wsProjectName, wsUri) ?? [];
 
-                socket = new WebSocket(`${wsUri}${querystr}`);
+                socket = new WebSocket(`${wsUri}${querystr}`, arrheadprotocols);
 
                 socket.onopen = function (evt) {
                     onOpen(evt)
@@ -2161,6 +2231,7 @@
                         setArrWSservers();
                         reloaNav();
                         reloadQueries();
+                        reloadHeads();
                     }
                 } else {
                     if (wsProjectId != '') {
@@ -2170,6 +2241,7 @@
                         setArrWSservers();
                         reloaNav();
                         reloadQueries();
+                        reloadHeads();
                     }
                 }
 
@@ -2188,6 +2260,7 @@
                     localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
                     reloaNav();
                     reloadQueries();
+                    reloadHeads();
                 }
 
                 localStorage.setItem("wsmsserveractive", wsUri);
@@ -2204,6 +2277,7 @@
             setArrWSservers();
             reloaNav();
             reloadQueries();
+            reloadHeads();
         }
 
         function closeConnect() {
@@ -2235,6 +2309,7 @@
         setArrWSservers();
         reloaNav();
         reloadQueries();
+        reloadHeads();
 
     </script>
 
