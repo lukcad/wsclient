@@ -35,6 +35,7 @@
   - button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unical.
   - List of `WS Parameters` where you can at this moment:
     - add new parameter with type `query` and your required name and value;
+    - add new value with type `head` and only for `Sec-WebSocket-Protocol` parameter, you can add many such parameters. This parameter is considered by WS-Servers as a `Protocol` name which is specific of algorithm implemented by server.
     - remove not needing parameter;
 
       Notice: `WS parameters` list help you add necessary prarameters which some ws-servers use for authentication, currntly it is one of the simpelst ways to verify authentication during connection of client to ws-server; Because there are another ways of authentication, in next releases new type of parameter can be added.
@@ -93,7 +94,7 @@ git clone https://github.com/lukcad/wsclient.git
 and then create `link` to `wsclient.html` file to let use this link by web-browser (`Firefox`, `Chrome`, `Edge`, `Opera`) when you need provide websoket testing on your local workstation or on your own Mobile. Also, having git clone it will be easier to update new version of client when you get message about new release. It is more convinient just pull new version from git rather than download new zip file, extract and copy `wsclient.html` file.
 
 ```bash
-git pull https://github.com/lukcad/wsclient.git
+git pull
 ```
 
 Notices:
@@ -111,3 +112,4 @@ Notices:
 ![alt text](image-4.png)
 ![alt text](image-5.png)
 ![alt text](image-6.png)
+![alt text](image-7.png)
