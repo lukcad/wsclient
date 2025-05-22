@@ -611,7 +611,7 @@
             <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
                 <h4>&#9776; WebSocket Client</h4>
             </div>
-            <div id="release" title="About program">v1.0.32</div>
+            <div id="release" title="About program">v1.0.33</div>
             <div id="newrelease" title="About new release"></div>
         </div>
 
@@ -886,7 +886,8 @@
                             var _projectid = convertProjectNameToId(_wsprojectname);
                             var _projectidnew = convertProjectNameToId(_wsprojectnamenew);
                             var _arrKeysToRemove = [];
-                            for ( var i = 0, len = localStorage.length; i < len; ++i ) {
+
+                            for (let i = 0; i < localStorage.length; i++) {
                                 var _key = localStorage.key( i );
                                 if (_key.startsWith(_projectid)) {
                                     var _newkey = _key.replace(_projectid, _projectidnew);
@@ -896,9 +897,8 @@
                                         
                                     }
                                     _arrKeysToRemove.push(_key);
-                                    
-
                                 }
+                                
                             }
 
                             _arrKeysToRemove.forEach(_oldkey => {
