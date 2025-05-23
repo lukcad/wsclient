@@ -2283,7 +2283,7 @@
         function closeConnect() {
             if ((socket !== null) & (socket !== undefined)) {
                 console.log(socket);
-                if (socket.readyState !== WebSocket.CLOSED) {
+                if (socket.readyState === WebSocket.OPEN) {
                     try {
                         wsUriClosing = socket.url ?? '';
                         socket.close();
