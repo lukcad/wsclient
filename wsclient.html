@@ -2279,7 +2279,8 @@
 
             var _wsProjectName = (document.getElementById('nameProject').value ?? '').trim();
             if (_wsProjectName !== '') {
-                var _wsProjectId = findExistingProjectName(_wsProjectName);
+                var _wsProjectExist = findExistingProjectName(_wsProjectName);
+                var _wsProjectId = convertProjectNameToId(_wsProjectExist);
                 if (_wsProjectId === ''){
                     wsProjectName = _wsProjectName;
                     if (arrProjects.indexOf(_wsProjectName) < 0) {
