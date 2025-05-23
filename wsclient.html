@@ -623,7 +623,7 @@
                 'Project 1' and 'Project1' will have the same key <b>'Project1_'</b>.
             </p>
         </details>
-        <input type="text" id="nameProject" onchange="changeProject()" value="" /> </br>
+        <input type="text" id="nameProject" onchange="changeProject()" /> </br>
         <details>
             <summary>WS Server to interact with messages:</summary>
             <p>You should point here your ws-server manually or choose it from group 'WS Projects' by left slide
@@ -1785,7 +1785,9 @@
 
                         localStorage.setItem(`${_wsProjectId}wsmsservers`, json_nav_str);
                         deleteWSParameters(_wsProjectName, wsserver, 'query');
+                        deleteWSParameters(_wsProjectName, wsserver, 'head');
                         this.parentElement.remove();
+                        reloaNavBy(_wsProjectName, _arrNav);
 
                     }
                     else {
@@ -1795,21 +1797,23 @@
                             deleteactivews = true;
                             closeConnect();
                         }
-                        if (arrNav.indexOf(wsserver) >= 0) {
-                            var indextoremove = arrNav.indexOf(wsserver);
+                        var _wsProjectId = convertProjectNameToId(_wsProjectName);
+                        var _arrNav = getArrWSserversBy(_wsProjectId) ?? [];
+                        var indextoremove = _arrNav.indexOf(wsserver);
+                        if (indextoremove >= 0) {
                             var newarrnav = [];
-                            for (let index = 0; index < arrNav.length; index++) {
+                            for (let index = 0; index < _arrNav.length; index++) {
 
                                 if (index !== indextoremove) {
-                                    if (arrNav[index] !== null) {
-                                        newarrnav.push(arrNav[index]);
+                                    if (_arrNav[index] !== null) {
+                                        newarrnav.push(_arrNav[index]);
                                     }
                                 }
                             }
                             arrNav = newarrnav;
 
                             var json_nav_str = JSON.stringify(arrNav);
-                            localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
+                            localStorage.setItem(`${_wsProjectId}wsmsservers`, json_nav_str);
 
                             if (deleteactivews) {
                                 document.getElementById("nameServer").value = '';
@@ -1817,6 +1821,7 @@
                                 localStorage.setItem("wsmsserveractive", wsUri);
                             }
                             deleteWSParameters(_wsProjectName, wsserver, 'query');
+                            deleteWSParameters(_wsProjectName, wsserver, 'head');
                             reloaNav();
                             reloadQueries();
                             reloadHeads();
@@ -2271,9 +2276,31 @@
         }
 
         function changeProject() {
+
+            var _wsProjectName = (document.getElementById('nameProject').value ?? '').trim();
+            if (_wsProjectName !== '') {
+                var _wsProjectId = findExistingProjectName(_wsProjectName);
+                if (_wsProjectId === ''){
+                    wsProjectName = _wsProjectName;
+                    if (arrProjects.indexOf(_wsProjectName) < 0) {
+                        arrProjects.push(_wsProjectName);
+                        var json_prj_str = JSON.stringify(arrProjects);
+                        localStorage.setItem("wsmsprojects", json_prj_str);
+                    }
+                } else {
+                    var _arrwsProjects = getarrProjectsWithProjectID(_wsProjectId);
+                    document.getElementById('nameProject').value = wsProjectName = _arrwsProjects.split('::')[1] ?? '';
+                }
+            } else {
+                wsProjectName = '';
+            }
+            
+            
             setProjectId();
+            setArrProjects();
             setArrHistory();
             reloadHistory();
+            reloadProjects();
             setArrWSservers();
             reloaNav();
             reloadQueries();
