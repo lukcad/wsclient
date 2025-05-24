@@ -26,6 +26,7 @@
   - text box to name specific `WS project` ( if project is not pointed then WS servers and messages are saved in common history which is separate from specific project )
 
     - if `WS project` is pointed than you can find it in `left slide menu` by icon &#9776; your created project in group named as `WS Projects`.
+
   - text box to point WS server ( by default it is: `wss://echo.websocket.org` );
   - text box to enter message which you wish to send to WS server;
 
@@ -57,7 +58,20 @@
   
   - Group `WS Projects`
 
-    - You can `add new project` with by executing sending request when `Project name` is filled in or `enrich existing project`.
+    - You can `add new project` into this group by two ways:
+
+      - By executing sending request in main working area when `Project name` is filled in with new name of project.
+      - By using context menu of `WS Projects` and choosing item `Create project`.
+
+    - You can `add ws-server` into any project from group also by two ways:
+
+      - By executing sending request in main working area for choosed project when `WS Server to interact with messages` is filled in with new name of URL of ws-server.
+      - By using context menu of any project and choosing item `Add ws-server`. Specific adding in this case is the next:
+
+        - URL will be checked that exists `ws://` or `wss://` in the beginning;
+        - from URL will be extracted name of ws-server if URL includes separator `?` for query parameters;
+        - from URL will be extracted all query parameters and added to `WS parameters` list for this server if URL includes separator `?` for query parameters and parameters using `=`.
+
     - You can `re-name project` together with relevant ws servers and history using context menu by right button or icon &nbsp;&brvbar;&nbsp; and then by choosing `Re-name project`.
     - You can `remove project` together with relevant ws servers and history using context menu by right button or icon &nbsp;&brvbar;&nbsp; and then by choosing `Remove project`.
     - You can `ws-server remove from project` if you expand list servers and press icon &times; against name of server.

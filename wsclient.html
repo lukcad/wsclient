@@ -689,6 +689,7 @@
         <!--Action menu for porjects. Hidden and appear only by right click-->
         <div id="menuProjectActions" class="dropdownmenu" style="display: none;">
             <b id="namemenuProjectActions"></b>
+            <p id="addWStoProject" onclick="clickMenuItemOnProjectActions(event)">Add ws-server</p>
             <p id="renameProject" onclick="clickMenuItemOnProjectActions(event)">Re-name project</p>            
             <p id="exportProject" onclick="clickMenuItemOnProjectActions(event)">Export project</p>
             <p id="removeProject" onclick="clickMenuItemOnProjectActions(event)">Remove project</p>
@@ -760,7 +761,24 @@
             <p></p>
             <button id="createname" onclick="createProjectName(event)" >Create</button>
         </div>
-    </div>       
+    </div>    
+    
+    <!-- The Modal dialog to add WS server to Project-->
+    <div id="wsAddWSServerProjectModal" class="wsmodal">
+        <!-- Name change of Project Modal content -->
+        <div class="wsmodal-content">
+            <span id="closeAddWSServerProjectModal" class="wsmodalclose">&times;</span>
+            <details>
+                <summary>WS-server URL:</summary>
+                <p>The URL should start from 'ws://' or 'wss://' and URL without query parameters will go to name of ws-server
+                    Query parameters will be extracted and added into ws-server into 'WS Parameters' list.
+                </p>
+            </details>
+            <input id="wsModalinp4" type="text"></input>
+            <p></p>
+            <button id="addwsservertoproject" onclick="addWsServerToProject(event)" >Add</button>
+        </div>
+    </div>     
 
     <script>
 
@@ -850,10 +868,6 @@
             popup.classList.toggle("show");
         }        
 
-
-
-
-
         // Create a WebSocket instance
         // and connect to the server
         var socket;
@@ -864,7 +878,78 @@
 
         initProjectNameAndId();
 
-        // modal dialog to add project name
+        // modal diallog to add ws-server to project
+        function modDialogWsAddWSserverToProject(_wsprojectname){
+
+                        // Get the modal
+            var modal = document.getElementById("wsAddWSServerProjectModal");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementById("closeAddWSServerProjectModal");
+
+            // open modal
+            modal.style.display = "block";
+            
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }  
+
+            addWsServerToProject = function(event) {
+                var _wsserver = document.getElementById("wsModalinp4").value.trim();
+
+                if (_wsserver !== ''){
+
+                    if ((_wsserver.startsWith('ws://')) || (_wsserver.startsWith('wss://')) ){
+
+                        var _wsparams = '';
+
+                        if (_wsserver.includes('?')){
+                            _wsparams = _wsserver.split('?')[1].trim();
+                            _wsserver = _wsserver.split('?')[0].trim();
+                        }
+
+                        if (isWSServerAdded(_wsprojectname, _wsserver) === false) {
+
+                            // add new ws-server to project
+                            addWSserver(_wsprojectname, _wsserver);
+
+                            // add parameters to new ws-server of project
+                            if (_wsparams.includes('&')){
+                                // adding many parameters
+                                var arrparams = _wsparams.split('&');
+                                arrparams.forEach(_wsparam => {
+                                    if (_wsparam.includes('=')) {
+                                        addWSParameter(_wsprojectname, _wsserver, 'query', _wsparam.split('=')[0], _wsparam.split('=')[1] ?? '');
+                                    }
+                                    
+                                });
+                            } else {
+                                // adding one parameter
+                                var _wsparam = _wsparams;
+                                if (_wsparam.includes('=')) {
+                                    addWSParameter(_wsprojectname, _wsserver, 'query', _wsparam.split('=')[0], _wsparam.split('=')[1] ?? '');
+                                }
+                            }                            
+
+                            modal.style.display = "none";
+                            
+                        } else {
+                            alert(`This ws-server URL "${_wsserver}" was added previously.\n Please change the ws-server URL and try again!`);
+                        }                        
+
+                    } else {
+                        alert(`This ws-server URL "${_wsserver}" should start from\n 'wss://' or 'ws://'.\n Please change the ws-server URL and try again!`);
+                    }
+
+                } else {
+                    alert('Empty ws-server URL can not be added. \n Please change the ws-server URL and try again!');
+                }
+            }
+
+        }
+
+        // modal dialog to create project name
         function modDialogWsCreateProjectName(){
 
             // Get the modal
@@ -895,7 +980,7 @@
                         modal.style.display = "none";
                         
                      } else {
-                            alert(`This project name can not be cretae.\n Because it generates the same key\n which is based on exisiting name or reserver word\n "${_wsprojectnameexisting}"\n Please change the project name and try again!`);
+                            alert(`This project name can not be cretated.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change the project name and try again!`);
                         }
 
                 } else {
@@ -904,7 +989,6 @@
             }
 
         }
-
 
         // modal dialog to change project name
         function modDialogWsChangeProjectName(_wsprojectname) {
@@ -988,7 +1072,7 @@
                             modal.style.display = "none";
                         } 
                     } else {
-                            alert(` New project name can not be assigned.\n Because it generates the same key\n which is based on exisiting name or reserver word\n "${_wsprojectnameexisting}"\n Please change new project name!`);
+                            alert(` New project name can not be assigned.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change new project name!`);
                         }
 
                 } else {
@@ -998,9 +1082,9 @@
             }
         }
 
-        // left slide menu navigation for `WS projects`
-
+        // list projects in left side menu `WS projects`
         var arrProjects = [];
+
         function setArrProjects() {
             arrProjects = [];
             var json_projects_str = '[]';
@@ -1019,8 +1103,7 @@
             }
         }
 
-
-        // left slide menu navigation for `History WS servers`
+        // array for history WS servers
         var arrNav;
 
         function setArrWSservers() {
@@ -1063,6 +1146,25 @@
             }
         }
 
+        function isWSServerAdded(_projectname, _wsserver) {
+            var isadded = false;
+            var _wsProjectId = convertProjectNameToId(_projectname) ?? '';
+            var _arrNav = [];
+            var json_srv_str = '[]';
+            if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== null) {
+                if (localStorage.getItem(`${_wsProjectId}wsmsservers`) !== '') {
+                    json_srv_str = localStorage.getItem(`${_wsProjectId}wsmsservers`);
+                }
+            }
+
+            var arrnavraw = JSON.parse(json_srv_str);
+
+            if (arrnavraw.indexOf(_wsserver) >= 0) {
+                isadded = true;
+            }
+            return isadded;
+        }
+
         function getArrWSserversBy(_wsProjectId) {
             _arrNav = [];
 
@@ -1084,7 +1186,7 @@
             return _arrNav;
         }
 
-        // history messages navigation
+        // array for history messages
         var arr;
 
         function setArrHistory() {
@@ -1303,6 +1405,11 @@
             var _wsprojectname = et.target.title;
             var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
             var actionName = et.target.id;
+
+            if (actionName === 'addWStoProject') {
+
+                modDialogWsAddWSserverToProject(`${_wsprojectname}`);
+            }
 
             if (actionName === 'renameProject') {
 
@@ -1751,6 +1858,7 @@
 
                 // add title in itmes of menu according to target (target here is souce of event)
                 var _wsprojectname = wsproject; // e.target.innerHTML;
+                document.getElementById("addWStoProject").title = _wsprojectname ?? '';
                 document.getElementById("renameProject").title = _wsprojectname ?? '';
                 document.getElementById("exportProject").title = _wsprojectname ?? '';
                 document.getElementById("removeProject").title = _wsprojectname ?? '';
@@ -2202,7 +2310,6 @@
             });
             return _arrheadprotocols;
         } 
-
 
         function addParameters() {
 
