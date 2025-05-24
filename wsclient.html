@@ -681,6 +681,7 @@
         <!--Action menu for WS Porjects title. Hidden and appear only by right click-->
         <div id="menuWSProjectsActions" class="dropdownmenu" style="display: none;">
             <b id="namemenuWSProjectsActions"></b>
+            <p id="createWSProject" onclick="clickMenuItemOnWSProjectsActions(event)">Create project</p>
             <p id="importWSProjects" onclick="clickMenuItemOnWSProjectsActions(event)">Import project</p>
             <p id="closeWSProjectsMenu" onclick="clickMenuItemOnWSProjectsActions(event)">Close menu</p>
         </div>
@@ -736,17 +737,30 @@
     </div>
 
     <!-- The Modal dialog to change Name of Project-->
-    <div id="wsProjectModal" class="wsmodal">
+    <div id="wsChangeProjectProjectModal" class="wsmodal">
         <!-- Name change of Project Modal content -->
         <div class="wsmodal-content">
-            <span class="wsmodalclose">&times;</span>
+            <span id="closeChangeProjectModal" class="wsmodalclose">&times;</span>
             <p>Old project name:</p>
             <input id="wsModalinp1" type="text"></input>
             <p>New project name:</p>
             <input id="wsModalinp2" type="text"></input>  
+            <p></p>
             <button id="modifyname" onclick="changeProjectName(event)" >Change</button>
         </div>
-    </div>    
+    </div>   
+    
+    <!-- The Modal dialog to create Project Name-->
+    <div id="wsCreateProjectProjectModal" class="wsmodal">
+        <!-- Name change of Project Modal content -->
+        <div class="wsmodal-content">
+            <span id="closeCreateProjectModal" class="wsmodalclose">&times;</span>
+            <p>Project name:</p>
+            <input id="wsModalinp3" type="text"></input>
+            <p></p>
+            <button id="createname" onclick="createProjectName(event)" >Create</button>
+        </div>
+    </div>       
 
     <script>
 
@@ -850,15 +864,56 @@
 
         initProjectNameAndId();
 
-
-        // function to change project name
-        function wschangeProjectName(_wsprojectname) {
+        // modal dialog to add project name
+        function modDialogWsCreateProjectName(){
 
             // Get the modal
-            var modal = document.getElementById("wsProjectModal");
+            var modal = document.getElementById("wsCreateProjectProjectModal");
 
             // Get the <span> element that closes the modal
-            var span = document.getElementsByClassName("wsmodalclose")[0];
+            var span = document.getElementById("closeCreateProjectModal");
+
+            // open modal
+            modal.style.display = "block";
+            
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }            
+
+            createProjectName = function(event) {
+                var _wsprojectnamenew = document.getElementById("wsModalinp3").value.trim();
+                
+
+                if (_wsprojectnamenew !== ''){
+                    var _wsprojectnameexisting = findExistingProjectName(_wsprojectnamenew);
+                    if (_wsprojectnameexisting === '') {
+
+                        // add new name of project to `wsprojects` and correct name if during add the proposed name has been changed.
+                        addProjectName(_wsprojectnamenew);
+                        reloadProjects();
+                        modal.style.display = "none";
+                        
+                     } else {
+                            alert(`This project name can not be cretae.\n Because it generates the same key\n which is based on exisiting name or reserver word\n "${_wsprojectnameexisting}"\n Please change the project name and try again!`);
+                        }
+
+                } else {
+                    alert('The project can not be created with empty name. \n Change name and try again!');
+                }
+            }
+
+        }
+
+
+        // modal dialog to change project name
+        function modDialogWsChangeProjectName(_wsprojectname) {
+
+            // Get the modal
+            var modal = document.getElementById("wsChangeProjectProjectModal");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementById("closeChangeProjectModal");
 
             // open modal
             modal.style.display = "block";
@@ -1127,6 +1182,29 @@
 
         }
 
+        function addProjectName(_wsProjectName) {
+
+            var _wsProjectNameAdded = '';
+            if (_wsProjectName !== '') {
+                var _wsProjectExist = findExistingProjectName(_wsProjectName);
+                var _wsProjectId = convertProjectNameToId(_wsProjectExist);
+                if (_wsProjectId === ''){
+                    _wsProjectNameAdded = _wsProjectName;
+                    if (arrProjects.indexOf(_wsProjectName) < 0) {
+                        arrProjects.push(_wsProjectName);
+                        var json_prj_str = JSON.stringify(arrProjects);
+                        localStorage.setItem("wsmsprojects", json_prj_str);
+                    }
+                } else {
+                    var _arrwsProjects = getarrProjectsWithProjectID(_wsProjectId);
+                    _wsProjectNameAdded = _arrwsProjects.split('::')[1] ?? '';
+                }
+            } else {
+                _wsProjectNameAdded = '';
+            }
+            return _wsProjectNameAdded;
+        }
+
         function convertProjectNameToId(wsprojectname) {
             var _wsProjectId = `${wsprojectname.replace(/[^A-Za-z0-9]/g, '')}`;
             return (_wsProjectId !== '') ? `${_wsProjectId}_` : '';
@@ -1199,6 +1277,11 @@
 
             var actionName = et.target.id;
 
+            if (actionName === 'createWSProject') {
+                // add new project
+                modDialogWsCreateProjectName();
+            }            
+
             if (actionName === 'importWSProjects') {
                 if (document.getElementById('projectimportfiles') !== null) {
                     document.getElementById('projectimportfiles').value = null;
@@ -1223,7 +1306,7 @@
 
             if (actionName === 'renameProject') {
 
-                wschangeProjectName(`${_wsprojectname}`);
+                modDialogWsChangeProjectName(`${_wsprojectname}`);
 
             }
 
@@ -2277,26 +2360,10 @@
 
         function changeProject() {
 
+            // add new name of project to `wsprojects` and correct name if during add the proposed name has been changed.
             var _wsProjectName = (document.getElementById('nameProject').value ?? '').trim();
-            if (_wsProjectName !== '') {
-                var _wsProjectExist = findExistingProjectName(_wsProjectName);
-                var _wsProjectId = convertProjectNameToId(_wsProjectExist);
-                if (_wsProjectId === ''){
-                    wsProjectName = _wsProjectName;
-                    if (arrProjects.indexOf(_wsProjectName) < 0) {
-                        arrProjects.push(_wsProjectName);
-                        var json_prj_str = JSON.stringify(arrProjects);
-                        localStorage.setItem("wsmsprojects", json_prj_str);
-                    }
-                } else {
-                    var _arrwsProjects = getarrProjectsWithProjectID(_wsProjectId);
-                    document.getElementById('nameProject').value = wsProjectName = _arrwsProjects.split('::')[1] ?? '';
-                }
-            } else {
-                wsProjectName = '';
-            }
-            
-            
+            document.getElementById('nameProject').value = wsProjectName = addProjectName(_wsProjectName);
+
             setProjectId();
             setArrProjects();
             setArrHistory();
