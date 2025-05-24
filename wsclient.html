@@ -831,7 +831,7 @@
                         var newReleasePopup = document.createElement("span");
                         newReleasePopup.id = "newReleasePopup";
                         newReleasePopup.className = "newReleasePopup";
-                        newReleasePopup.innerHTML = `There is new version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull latest version from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> <br>or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025`;
+                        newReleasePopup.innerHTML = `There is <a href='https://github.com/lukcad/wsclient/releases'>new release</a> version ${maxRelease} <br> you can download it here: <br> <a href='https://github.com/lukcad/wsclient/archive/refs/tags/${maxRelease}.zip' >Release ${maxRelease}</a><br> or pull latest version from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> <br>or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025`;
 
                         var newRelease = document.getElementById("newrelease");
                         newRelease.className = "newreleasebadge";
@@ -857,7 +857,7 @@
         var ReleasePopup = document.createElement("span");
         ReleasePopup.id = "ReleasePopup";
         ReleasePopup.className = "ReleasePopup";
-        ReleasePopup.innerHTML = `ABOUT:<br><br> WebSocket client to test<br>and keep test projects<br>with messages and servers<br><br>Latest commit of release<br> you can get from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025 `;
+        ReleasePopup.innerHTML = `ABOUT:<br><br> WebSocket client to test<br>and keep test projects<br>with messages and servers<br><a href='https://github.com/lukcad/wsclient/wiki/WebSocket-client'>WIKI PAGE</a><br>Latest commit of release<br> you can get from <br> <a href='https://github.com/lukcad/wsclient/archive/refs/heads/main.zip' >Download zip</a><br> or pull main branch <br> from <a href='https://github.com/lukcad/wsclient'>gitHub</a><br>or clone by command: <h6>&nbsp;git clone https://github.com/lukcad/wsclient.git&nbsp;</h6>Copyright &copy; LukCAD 1992-2025 `;
 
         var Release = document.getElementById("release");
         Release.onclick = toogleReleasePopup;
