@@ -2,11 +2,11 @@
 
 ## Overview
 
-`wsclient.html` is a single client file which works in all web browsers by using just only HTML and pure javascript with saving history, ws-servers and your projects into local storage of web browser.
+`wsclient.html` is a single client file which works in all web browsers by using just only HTML and pure JavaScript with saving history, ws-servers and your projects into local storage of web browser.
 
 ### Arcitecture
 
-- This client creates websocket listener with name `socket` with all event methods during start html page or during pressing button for re-coonection:
+- This client creates websocket listener with name `socket` with all event methods during start html page or during pressing button for re-connection:
 
   - socket.onopen
   - socket.onclose
@@ -33,21 +33,21 @@
   - button `Disconnect` to stop connection to WS server.
   - button `Reconnect` to start connection to WS server again after stop.
   - button `Clean Messages` to remove messages from panel `Messages`.
-  - button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unical.
+  - button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unique.
   - List of `WS Parameters` where you can at this moment:
     - add new parameter with type `query` and your required name and value;
     - add new value with type `head` and only for `Sec-WebSocket-Protocol` parameter, you can add many such parameters. This parameter is considered by WS-Servers as a `Protocol` name which is specific of algorithm implemented by server.
     - remove not needing parameter;
 
-      Notice: `WS parameters` list help you add necessary prarameters which some ws-servers use for authentication, currntly it is one of the simpelst ways to verify authentication during connection of client to ws-server; Because there are another ways of authentication, in next releases new type of parameter can be added.
+      Notices: `WS parameters` list help you add necessary parameters which some ws-servers use for authentication, currently it is one of the simplest ways to verify authentication during connection of client to ws-server; Because there are another ways of authentication, in next releases new type of parameter can be added.
 
   - Panel `Messages` shows all conversation with web socket server:
     - what message you sent;
     - what response has been received;
     - what kind error has been encountered;
-    - reaction on reconnect and disconnet buttons;
+    - reaction on reconnect and disconnect buttons;
 
-  - Panel `Histoy of sending unical messages` helps you keep history of messages to re-use those for re-sending when you re-open client or clean up messages.
+  - Panel `History of sending unique messages` helps you keep history of messages to re-use those for re-sending when you re-open client or clean up messages.
     - pressed text in `History` panel will be copied to text box for `Message` to speed up your testing.
     - you can remove any message from `History` of messages by using `X` button  with confirmation prompt.
   - icon button &#9776; in upper left corner of main working area opens `Left slide menu`.
@@ -65,7 +65,7 @@
 
     - You can `add ws-server` into any project from group also by two ways:
 
-      - By executing sending request in main working area for choosed project when `WS Server to interact with messages` is filled in with new name of URL of ws-server.
+      - By executing sending request in main working area for chosen project when `WS Server to interact with messages` is filled in with new name of URL of ws-server.
       - By using context menu of any project and choosing item `Add ws-server`. Specific adding in this case is the next:
 
         - URL will be checked that exists `ws://` or `wss://` in the beginning;
@@ -85,7 +85,7 @@
     - You can `import history ws-servers` from local file by pressing pressing righ button on `History WS servers` and choosing from context menu `Import history` item. Also you can open context menu to execute this operation by using icon &#9783;.
     - you can `export history ws-servers` to local file by pressing righ button on `History WS servers` and choosing from context menu `Export history` item. Also you can open context menu to execute this operation by using icon &#9783;.
 
-### General Notices
+### General notices
 
 - `Information how to use` is provided by details text which can be expanded or hided when you press on item of page which has this symbol: &#x27A4;
 
@@ -95,7 +95,7 @@
 
 - You can export and import `WS Projects` of `History WS servers` between your browsers or colleagues using files `*.wsclient`.
 
-## How ot use
+## How to use
 
 You can simply clone project from GitHub and start use file [`wsclient.html`](wsclient.html) by any web browser locally on your computer or mobile for your testing and sending messages to web socket servers.
 
@@ -116,8 +116,8 @@ Notices:
 - All your projects and history will be saved by this WebSocket client into your browser only.
 - New version of client does not impact previously created projects, so after upgrade to new version you can continue use your previously created projects.
 - You can easily export and import projects between web browsers to save time if you need provide testing sockets from different web browsers.
-- On Mobile `websocket.html` you can open by any `File manager`. And during opening you can use these web browsers in mobile mode: `Edge`, `Chrome`, `FireFox`, `Opera`, `Samsung Intenet` and many others that support local storage.
-- If you clean up local storage of yoour web browser (you can do it by settings in browser) then you will clean up all projects and history for websocket client. Recommendation here: export (by functionality of websocket client) time by time important projects to your local file storage of workstation.
+- On Mobile `websocket.html` you can open by any `File manager`. And during opening you can use these web browsers in mobile mode: `Edge`, `Chrome`, `FireFox`, `Opera`, `Samsung Internet` and many others that support local storage.
+- If you clean up local storage of your web browser (you can do it by settings in browser) then you will clean up all projects and history for WebSocket client. Recommendation here: export (by functionality of WebSocket client) time by time important projects to your local file storage of workstation.
 
 ![alt text](image.png)
 ![alt text](image-1.png)
