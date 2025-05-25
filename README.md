@@ -1,5 +1,7 @@
 # Websocket client WSCLIENT.HTML
 
+Clone or [download project](https://github.com/lukcad/wsclient.git) and use locally only file `wsclient.html` as a WebSocket client.
+
 ## Overview
 
 `wsclient.html` is a single client file which works in all web browsers by using just only HTML and pure JavaScript with saving history, ws-servers and your projects into local storage of web browser.
@@ -33,7 +35,10 @@
   - button `Disconnect` to stop connection to WS server.
   - button `Reconnect` to start connection to WS server again after stop.
   - button `Clean Messages` to remove messages from panel `Messages`.
-  - button `Send` - to send message from text box to WS and get response. if sending succeed then sending message will be added to history if it is unique.
+  - button `Send` - to send `Message` from text box to WS-server and get response:
+    - if sending succeed then the sent message will be added to history if it is unique and purged from `Message` text box.
+    - if it was detected that the socket was not opened yet or previously closed then `alert message` will appear with explanation of situation and asking you to press button `Reconnect` to let you repeat sending mssage from `Message` text box.
+    - if during sending with opened web socket some error were detected on server side, the response message returns code or error and web socket will be closed.
   - List of `WS Parameters` where you can at this moment:
     - add new parameter with type `query` and your required name and value;
     - add new value with type `head` and only for `Sec-WebSocket-Protocol` parameter, you can add many such parameters. This parameter is considered by WS-Servers as a `Protocol` name which is specific of algorithm implemented by server.
@@ -127,3 +132,4 @@ Notices:
 ![alt text](image-5.png)
 ![alt text](image-6.png)
 ![alt text](image-7.png)
+![alt text](image-8.png)
