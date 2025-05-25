@@ -573,7 +573,29 @@
             color: #000;
             text-decoration: none;
             cursor: pointer;
-        }        
+        }    
+        
+        .wsconfirmmodal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 99; /* Sit on top */
+            padding-top: 90px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .wsconfirmmodal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 60%;
+        }
 
     </style>
 </head>
@@ -778,9 +800,22 @@
             <p></p>
             <button id="addwsservertoproject" onclick="addWsServerToProject(event)" >Add</button>
         </div>
+    </div>  
+    
+    <!-- The Modal dialog of ws confirm to be used instead of standard confirm-->
+    <div id="wsConfirmDialogModal" class="wsconfirmmodal">
+        <!-- Name change of Project Modal content -->
+        <div class="wsconfirmmodal-content">
+            <p id="wsconfirmtext"></p>
+            <p></p>
+            <button id="wsconfirmyes">Yes</button>
+            <button id="wsconfirmno">No</button>
+        </div>
     </div>     
 
     <script>
+
+
 
         function changeParamInput(event) {
             if (event.target.value === 'head') {
@@ -877,6 +912,40 @@
         var wsProjectName;
 
         initProjectNameAndId();
+
+        // modal diallog to organize custom confirm instead of standard
+        // way to use: 
+        //   1) function which uses it should be async 
+        //   2) getting result should use pattern:
+        //      var result = await wsConfirm('Some test message');
+        function wsConfirm(_wsconfirmtext) {
+            return new Promise((resolve, reject) => {
+
+            var _result;
+
+            // Get the modal
+            var modal = document.getElementById("wsConfirmDialogModal");
+
+            // Set confirm text
+            document.getElementById("wsconfirmtext").innerHTML = _wsconfirmtext ?? '';
+
+            // open modal
+            modal.style.display = "block";                
+            
+                wsconfirmyes.onclick = function() {
+                    modal.style.display = "none";
+                    resolve(true);
+                    //callback(true);
+                }
+
+                wsconfirmno.onclick = function() {
+                    modal.style.display = "none";
+                    resolve(false);
+                    //callback(false);
+                }
+            });
+            
+        }
 
         // modal diallog to add ws-server to project
         function modDialogWsAddWSserverToProject(_wsprojectname){
@@ -1012,7 +1081,7 @@
             document.getElementById("wsModalinp1").disabled = true;
             
             // business: read new name and save to _idtochange
-            changeProjectName = function(event) {
+            changeProjectName = async function(event) {
                 var _wsprojectnamenew = document.getElementById("wsModalinp2").value.trim();
                 
 
@@ -1020,7 +1089,7 @@
                     var _wsprojectnameexisting = findExistingProjectName(_wsprojectnamenew);
                     if (_wsprojectnameexisting === '') {
                         // we ready to rename here and ask last times
-                        var result = confirm(`Want to rename WS project: "${_wsprojectname}" to new name "${_wsprojectnamenew}" ? `);
+                        var result = await wsConfirm(`Want to rename WS project: "${_wsprojectname}" to new name "${_wsprojectnamenew}" ? `);
                         if (result) {
                             var _projectid = convertProjectNameToId(_wsprojectname);
                             var _projectidnew = convertProjectNameToId(_wsprojectnamenew);
@@ -1400,7 +1469,7 @@
             et.target.parentElement.style.display = "none";
         }
 
-        function clickMenuItemOnProjectActions(et) {
+        async function clickMenuItemOnProjectActions(et) {
             // do operations according to context menu here:
             var _wsprojectname = et.target.title;
             var _wsprojectid = convertProjectNameToId(_wsprojectname) ?? '';
@@ -1469,7 +1538,7 @@
             }
 
             if (actionName === 'removeProject') {
-                var result = confirm(`Want to delete WS project: "${_wsprojectname}" ? Message history and WS servers of project will be deleted as well.`);
+                var result = await wsConfirm(`Want to delete WS project: "${_wsprojectname}" ? Message history and WS servers of project will be deleted as well.`);
                 if (result) {
                     var deleteactivews = false;
                     if (_wsprojectname === wsProjectName) {
@@ -1949,8 +2018,8 @@
                 closeNav();
             }
 
-            function removeWsServer() {
-                var result = confirm(`Want to delete WS server: "${wsserver}" ?`);
+            async function removeWsServer() {
+                var result = await wsConfirm(`Want to delete WS server: "${wsserver}" ?`);
                 if (result) {
                     var _wsProjectName = this.getAttribute("prjname") ?? '';
                     var anotherProject = false;
@@ -2068,9 +2137,9 @@
                 messageInput.value = message;
             }
 
-            function delMessageFromHistory() {
+            async function delMessageFromHistory() {
 
-                var result = confirm(`Want to delete from history: "${message}" ?`);
+                var result = await wsConfirm(`Want to delete from history: "${message}" ?`);
                 if (result) {
                     if (arr.indexOf(message) >= 0) {
                         var indextoremove = arr.indexOf(message);
@@ -2125,9 +2194,9 @@
             queryList.appendChild(parVal);
             queryList.appendChild(parAct);
 
-            function deleteParamVal() {
+            async function deleteParamVal() {
 
-                var result = confirm(`Want to delete parameter: "${_parname}" ?`);
+                var result = await wsConfirm(`Want to delete parameter: "${_parname}" ?`);
                 if (result) {
                     var _wsprojectid = convertProjectNameToId(wsProjectName) ?? '';
                     var _wsserverid = convertWsServerNameToId(wsUri) ?? '';
