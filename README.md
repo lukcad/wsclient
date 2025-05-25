@@ -1,6 +1,6 @@
 # Websocket client WSCLIENT.HTML
 
-Clone or [download project](https://github.com/lukcad/wsclient.git) and use locally only file `wsclient.html` as a WebSocket client.
+Clone or [download project](https://github.com/lukcad/wsclient/archive/refs/heads/main.zip) and use locally only file `wsclient.html` as a WebSocket client.
 
 ## Overview
 
