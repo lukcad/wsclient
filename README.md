@@ -1,4 +1,4 @@
-# Websocket client WSCLIENT.HTML
+# WebSocket client WSCLIENT.HTML
 
 Clone or [download project](https://github.com/lukcad/wsclient/archive/refs/heads/main.zip) and use locally only file `wsclient.html` as a WebSocket client.
 
@@ -6,7 +6,7 @@ Clone or [download project](https://github.com/lukcad/wsclient/archive/refs/head
 
 `wsclient.html` is a single client file which works in all web browsers by using just only HTML and pure JavaScript with saving history, ws-servers and your projects into local storage of web browser.
 
-### Arcitecture
+### Architecture
 
 - This client creates websocket listener with name `socket` with all event methods during start html page or during pressing button for re-connection:
 

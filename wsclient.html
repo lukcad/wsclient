@@ -675,7 +675,7 @@
                 When you enter new ws-server manually you have to use button 'Reconnect' to be able strart connection to
                 pointed server. </p>
         </details>
-        <input type="text" id="nameServer" value="wss://echo.websocket.org" /> </br>
+        <input type="text" id="nameServer" onchange="changeNameServer()" value="wss://echo.websocket.org" /> </br>
         <details>
             <summary>WS Parameters:</summary>
             <p>You can point the necessary 'query' parameters that should be applied to ws-server when you create connect to it. For example: for token
@@ -2524,68 +2524,81 @@
             const message = messageInput.value;
 
             var _nameServer = (document.getElementById('nameServer').value ?? '').trim();
+            if ((_nameServer !== '') || (_nameServer.startsWith('ws://')) || (_nameServer.startsWith('wss://') )) {
+                if (socket.readyState === WebSocket.OPEN) {
+                    // Send the message to 
+                    // the WebSocket server			
+                    socket.send(message);
+                    // and show what we sent
+                    addToMessagesElement(`Sent message: ${message}`, 'blue');
 
-            if (socket.readyState === WebSocket.OPEN) {
-                // Send the message to 
-                // the WebSocket server			
-                socket.send(message);
-                // and show what we sent
-                addToMessagesElement(`Sent message: ${message}`, 'blue');
+
+                    var nameProject = (document
+                        .getElementById('nameProject').value ?? '').trim();
+                    if (nameProject !== '') {
+                        if (arrProjects.indexOf(nameProject) < 0) {
+                            arrProjects.push(nameProject);
+                            var json_prj_str = JSON.stringify(arrProjects);
+                            localStorage.setItem("wsmsprojects", json_prj_str);
+                            setProjectId();
+                            reloadProjects();
+                            setArrHistory();
+                            reloadHistory();
+                            setArrWSservers();
+                            reloaNav();
+                            reloadQueries();
+                            reloadHeads();
+                        }
+                    } else {
+                        if (wsProjectId != '') {
+                            setProjectId();
+                            setArrHistory();
+                            reloadHistory();
+                            setArrWSservers();
+                            reloaNav();
+                            reloadQueries();
+                            reloadHeads();
+                        }
+                    }
 
 
-                var nameProject = (document
-                    .getElementById('nameProject').value ?? '').trim();
-                if (nameProject !== '') {
-                    if (arrProjects.indexOf(nameProject) < 0) {
-                        arrProjects.push(nameProject);
-                        var json_prj_str = JSON.stringify(arrProjects);
-                        localStorage.setItem("wsmsprojects", json_prj_str);
-                        setProjectId();
-                        reloadProjects();
-                        setArrHistory();
-                        reloadHistory();
-                        setArrWSservers();
+
+                    if (arr.indexOf(message) < 0) {
+                        arr.push(message);
+                        var json_str = JSON.stringify(arr);
+                        localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
+                        addToHistoryElement(`${message}`, 'brown');
+                    }
+
+                    if (arrNav.indexOf(wsUri) < 0) {
+                        arrNav.push(wsUri);
+                        var json_nav_str = JSON.stringify(arrNav);
+                        localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
                         reloaNav();
                         reloadQueries();
                         reloadHeads();
                     }
+
+                    localStorage.setItem("wsmsserveractive", wsUri);
+
+                    // Clear the message input
+                    messageInput.value = '';
+
                 } else {
-                    if (wsProjectId != '') {
-                        setProjectId();
-                        setArrHistory();
-                        reloadHistory();
-                        setArrWSservers();
-                        reloaNav();
-                        reloadQueries();
-                        reloadHeads();
-                    }
+                    wsAlert(`You can not send message at this moment. Because 'websocket client' is not connected to ws-server "${_nameServer}". Please press button <b>Reconnect</b> and then repeat sending your message.`)
                 }
-
-
-
-                if (arr.indexOf(message) < 0) {
-                    arr.push(message);
-                    var json_str = JSON.stringify(arr);
-                    localStorage.setItem(`${wsProjectId}wsmshistory`, json_str);
-                    addToHistoryElement(`${message}`, 'brown');
-                }
-
-                if (arrNav.indexOf(wsUri) < 0) {
-                    arrNav.push(wsUri);
-                    var json_nav_str = JSON.stringify(arrNav);
-                    localStorage.setItem(`${wsProjectId}wsmsservers`, json_nav_str);
-                    reloaNav();
-                    reloadQueries();
-                    reloadHeads();
-                }
-
-                localStorage.setItem("wsmsserveractive", wsUri);
-
-                // Clear the message input
-                messageInput.value = '';
-
             } else {
-                wsAlert(`You can not send message at this moment. Because 'websocket client' is not connected to ws-server "${_nameServer}". Please press button <b>Reconnect</b> and then repeat sending your message.`)
+                wsAlert(`You can not send message when name of ws-server is empty or invalid. WS-Server should have in the beginning 'ws://' or 'wss://' `)
+            }
+
+
+        }
+
+        function changeNameServer() {
+            
+            var _nameServer = (document.getElementById('nameServer').value ?? '').trim();
+            if (_nameServer !== wsUri) {
+                closeConnect();
             }
         }
 
