@@ -597,6 +597,28 @@
             width: 60%;
         }
 
+        .wsalertmodal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 100; /* Sit on top */
+            padding-top: 80px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        .wsalertmodal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 70%;
+        }        
+
     </style>
 </head>
 
@@ -633,7 +655,7 @@
             <div style="cursor:pointer;white-space: nowrap" onclick="openNav()">
                 <h4>&#9776; WebSocket Client</h4>
             </div>
-            <div id="release" title="About program">v1.0.35</div>
+            <div id="release" title="About program">v1.0.36</div>
             <div id="newrelease" title="About new release"></div>
         </div>
 
@@ -802,7 +824,7 @@
         </div>
     </div>  
     
-    <!-- The Modal dialog of ws confirm to be used instead of standard confirm-->
+    <!-- The Modal dialog wsConfirm to be used instead of standard confirm-->
     <div id="wsConfirmDialogModal" class="wsconfirmmodal">
         <!-- Name change of Project Modal content -->
         <div class="wsconfirmmodal-content">
@@ -811,7 +833,17 @@
             <button id="wsconfirmyes">Yes</button>
             <button id="wsconfirmno">No</button>
         </div>
-    </div>     
+    </div>   
+    
+    <!-- The Modal dialog wsAlert to be used instead of standard alert-->
+    <div id="wsAlertDialogModal" class="wsalertmodal">
+        <!-- Name change of Project Modal content -->
+        <div class="wsalertmodal-content">
+            <span id="wsalerttext"></span>
+            <p></p>
+            <button id="wsalertok" onclick="wsalertclick(event)">Ok</button>
+        </div>
+    </div>  
 
     <script>
 
@@ -913,6 +945,25 @@
 
         initProjectNameAndId();
 
+        // modal dialog to organize custom alert instead of standard
+        function wsAlert(_wsalerttext) {
+
+            // Get the modal
+            var modal = document.getElementById("wsAlertDialogModal");
+
+            // Set confirm text
+            document.getElementById("wsalerttext").innerHTML = _wsalerttext ?? '';
+
+            // open modal
+            modal.style.display = "block";  
+
+            wsalertclick = function(event) {
+                modal.style.display = "none";
+            }
+
+
+        }
+
         // modal diallog to organize custom confirm instead of standard
         // way to use: 
         //   1) function which uses it should be async 
@@ -920,8 +971,6 @@
         //      var result = await wsConfirm('Some test message');
         function wsConfirm(_wsconfirmtext) {
             return new Promise((resolve, reject) => {
-
-            var _result;
 
             // Get the modal
             var modal = document.getElementById("wsConfirmDialogModal");
@@ -1004,15 +1053,15 @@
                             modal.style.display = "none";
                             
                         } else {
-                            alert(`This ws-server URL "${_wsserver}" was added previously.\n Please change the ws-server URL and try again!`);
+                            wsAlert(`This ws-server URL "${_wsserver}" was added previously.\n Please change the ws-server URL and try again!`);
                         }                        
 
                     } else {
-                        alert(`This ws-server URL "${_wsserver}" should start from\n 'wss://' or 'ws://'.\n Please change the ws-server URL and try again!`);
+                        wsAlert(`This ws-server URL "${_wsserver}" should start from\n 'wss://' or 'ws://'.\n Please change the ws-server URL and try again!`);
                     }
 
                 } else {
-                    alert('Empty ws-server URL can not be added. \n Please change the ws-server URL and try again!');
+                    wsAlert('Empty ws-server URL can not be added. \n Please change the ws-server URL and try again!');
                 }
             }
 
@@ -1049,11 +1098,11 @@
                         modal.style.display = "none";
                         
                      } else {
-                            alert(`This project name can not be cretated.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change the project name and try again!`);
+                            wsAlert(`This project name can not be cretated.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change the project name and try again!`);
                         }
 
                 } else {
-                    alert('The project can not be created with empty name. \n Change name and try again!');
+                    wsAlert('The project can not be created with empty name. \n Change name and try again!');
                 }
             }
 
@@ -1141,11 +1190,11 @@
                             modal.style.display = "none";
                         } 
                     } else {
-                            alert(` New project name can not be assigned.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change new project name!`);
+                            wsAlert(` New project name can not be assigned.\n Because it generates the same key\n which is based on exisiting name or reserved word\n "${_wsprojectnameexisting}"\n Please change new project name!`);
                         }
 
                 } else {
-                    alert('New project name can not be empty. \n Change name and try again!');
+                    wsAlert('New project name can not be empty. \n Change name and try again!');
                 }
 
             }
@@ -1723,7 +1772,7 @@
                                 reloadProjects();
                             }
                         } else {
-                            alert('This file does not have project. Please choose another file.')
+                            wsAlert('This file does not have project. Please choose another file.')
                         }
 
                     } else
@@ -1789,7 +1838,7 @@
 
                         _projectname = (line.split('projectname:')[1]) ?? '';
                         if (_projectname !== '') {
-                            alert('this is not history file! Please choose another file.')
+                            wsAlert('this is not history file! Please choose another file.')
                         }
 
                     } else
@@ -2391,11 +2440,11 @@
                     reloadQueries();
                     reloadHeads();
                 } else {
-                    alert('Please fill in name of parameter. It is mandatory information.');
+                    wsAlert('Please fill in name of parameter. It is mandatory information.');
                 }
 
             } else {
-                alert('Please point actual ws server!');
+                wsAlert('Please point actual ws server!');
             }
         }
 
