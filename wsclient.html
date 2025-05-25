@@ -2523,12 +2523,15 @@
             // the message input
             const message = messageInput.value;
 
+            var _nameServer = (document.getElementById('nameServer').value ?? '').trim();
+
             if (socket.readyState === WebSocket.OPEN) {
                 // Send the message to 
                 // the WebSocket server			
                 socket.send(message);
                 // and show what we sent
                 addToMessagesElement(`Sent message: ${message}`, 'blue');
+
 
                 var nameProject = (document
                     .getElementById('nameProject').value ?? '').trim();
@@ -2578,9 +2581,12 @@
 
                 localStorage.setItem("wsmsserveractive", wsUri);
 
+                // Clear the message input
+                messageInput.value = '';
+
+            } else {
+                wsAlert(`You can not send message at this moment. Because 'websocket client' is not connected to ws-server "${_nameServer}". Please press button <b>Reconnect</b> and then repeat sending your message.`)
             }
-            // Clear the message input
-            messageInput.value = '';
         }
 
         function changeProject() {
