@@ -743,6 +743,7 @@
         <!--Action menu for history. Hidden and appear only by right click-->
         <div id="menuHistoryActions" class="dropdownmenu" style="display: none;">
             <b id="namemenuHistoryActions"></b>
+            <p id="addWStoHistory" onclick="clickMenuItemOnHistoryActions(event)">Add ws-server</p>            
             <p id="exportHistory" onclick="clickMenuItemOnHistoryActions(event)">Export history</p>
             <p id="importHistory" onclick="clickMenuItemOnHistoryActions(event)">Import history</p>
             <p id="closeHistoryMenu" onclick="clickMenuItemOnHistoryActions(event)">Close menu</p>
@@ -1047,6 +1048,77 @@
                                 var _wsparam = _wsparams;
                                 if (_wsparam.includes('=')) {
                                     addWSParameter(_wsprojectname, _wsserver, 'query', _wsparam.split('=')[0], _wsparam.split('=')[1] ?? '');
+                                }
+                            }                            
+
+                            modal.style.display = "none";
+                            
+                        } else {
+                            wsAlert(`This ws-server URL "${_wsserver}" was added previously.\n Please change the ws-server URL and try again!`);
+                        }                        
+
+                    } else {
+                        wsAlert(`This ws-server URL "${_wsserver}" should start from\n 'wss://' or 'ws://'.\n Please change the ws-server URL and try again!`);
+                    }
+
+                } else {
+                    wsAlert('Empty ws-server URL can not be added. \n Please change the ws-server URL and try again!');
+                }
+            }
+
+        }
+
+        // modal diallog to add ws-server to history
+        function modDialogWsAddWSserverToHistory(){
+
+                        // Get the modal
+            var modal = document.getElementById("wsAddWSServerProjectModal");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementById("closeAddWSServerProjectModal");
+
+            // open modal
+            modal.style.display = "block";
+            
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }  
+
+            addWsServerToProject = function(event) {
+                var _wsserver = document.getElementById("wsModalinp4").value.trim();
+
+                if (_wsserver !== ''){
+
+                    if ((_wsserver.startsWith('ws://')) || (_wsserver.startsWith('wss://')) ){
+
+                        var _wsparams = '';
+
+                        if (_wsserver.includes('?')){
+                            _wsparams = _wsserver.split('?')[1].trim();
+                            _wsserver = _wsserver.split('?')[0].trim();
+                        }
+
+                        if (isWSServerAdded('', _wsserver) === false) {
+
+                            // add new ws-server to project
+                            addWSserver('', _wsserver);
+
+                            // add parameters to new ws-server of project
+                            if (_wsparams.includes('&')){
+                                // adding many parameters
+                                var arrparams = _wsparams.split('&');
+                                arrparams.forEach(_wsparam => {
+                                    if (_wsparam.includes('=')) {
+                                        addWSParameter('', _wsserver, 'query', _wsparam.split('=')[0], _wsparam.split('=')[1] ?? '');
+                                    }
+                                    
+                                });
+                            } else {
+                                // adding one parameter
+                                var _wsparam = _wsparams;
+                                if (_wsparam.includes('=')) {
+                                    addWSParameter('', _wsserver, 'query', _wsparam.split('=')[0], _wsparam.split('=')[1] ?? '');
                                 }
                             }                            
 
@@ -1694,6 +1766,10 @@
             var _wsprojectname = '';
             var _wsprojectid = '';
             var actionName = et.target.id;
+
+            if (actionName === 'addWStoHistory') {
+                modDialogWsAddWSserverToHistory();
+            }
 
             if (actionName === 'exportHistory') {
                 // here we create dynamically file and save it
